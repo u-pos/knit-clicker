@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ニット帽クリッカー</title>
+  <title>ニットクリッカー</title>
   <style>
     :root{--bg1:#12314f;--bg2:#071520;--panel:rgba(7,21,32,.86);--line:rgba(255,255,255,.1);--text:#f8fafc;--muted:#c3d1dc;--accent:#f3c54b;--money:#90f2a9;--shadow:0 24px 48px rgba(0,0,0,.28)}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;font-family:"Yu Gothic UI","Meiryo",sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(243,197,75,.22),transparent 24%),linear-gradient(180deg,var(--bg1),var(--bg2))}
@@ -89,7 +89,7 @@
       let state=load(),renderQueued=false;
       const upgrades=[
         {id:"worker",name:"作業員",description:"毎秒1クリックポイントを自動で生み出します。",baseCost:500,growth:1.18,image:"./worker.png",owned:c=>`${fmtInt(c)}人`,extra:()=>"",buy:s=>s.workers+=1},
-        {id:"workerUpgrade",name:"作業員強化",description:"すべての作業員の生産力を2倍にします。",baseCost:2000,growth:2.3,image:"./worker.png",owned:c=>`${fmtInt(c)}回`,extra:()=>`現在の作業員倍率 x${fmt(workerUnitPower()*2)}`,buy:s=>s.workerUpgrades+=1},
+        {id:"workerUpgrade",name:"作業員強化",description:"すべての作業員の生産力を2倍にします。",baseCost:2000,growth:2.3,image:"./kyouka.png",owned:c=>`${fmtInt(c)}回`,extra:()=>`現在の作業員倍率 x${fmt(workerUnitPower()*2)}`,buy:s=>s.workerUpgrades+=1},
         {id:"factory",name:"工場",description:"毎秒1個のニット帽を自動生産します。",baseCost:10000,growth:1.22,image:"./factory.png",owned:c=>`${fmtInt(c)}棟`,extra:()=>"",buy:s=>s.factories+=1}
       ];
       function load(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return initial();const p=JSON.parse(raw),b=initial();return {...b,...p,clickPoints:safe(p.clickPoints),hats:safe(p.hats),yen:safe(p.yen),lifetimeYen:safe(p.lifetimeYen),workers:Math.floor(safe(p.workers)),workerUpgrades:Math.floor(safe(p.workerUpgrades)),factories:Math.floor(safe(p.factories)),prestigePoints:Math.floor(safe(p.prestigePoints)),comboStacks:Math.floor(safe(p.comboStacks)),comboExpiresAt:safe(p.comboExpiresAt),lastTickAt:Date.now(),lastSaveAt:0,lastActiveAt:safe(p.lastActiveAt)||Date.now(),lastOfflineSummary:typeof p.lastOfflineSummary==="string"?p.lastOfflineSummary:""}}catch{return initial()}}
