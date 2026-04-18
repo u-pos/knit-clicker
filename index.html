@@ -26,7 +26,7 @@ body{
 
 .bg{ position:absolute; width:100%; height:100%; }
 
-/* ===== 左パネル ===== */
+/* ===== 左 ===== */
 .panel{
   position:absolute;
   top:20px;
@@ -44,7 +44,7 @@ body{
   line-height:2.3;
 }
 
-/* 保存ボタン（位置修正） */
+/* 保存 */
 .save{
   margin-top:15px;
   background:#222;
@@ -71,7 +71,6 @@ body{
   font-size:28px;
   font-weight:bold;
   pointer-events:none;
-  text-shadow:2px 2px 0 #000;
   animation:popAnim 0.8s forwards;
 }
 @keyframes popAnim{
@@ -85,7 +84,6 @@ body{
   height:40px;
   background:radial-gradient(circle,#fff,#ffd700,transparent);
   border-radius:50%;
-  pointer-events:none;
   animation:sparkle 0.6s forwards;
 }
 @keyframes sparkle{
@@ -102,31 +100,42 @@ body{
 }
 .deliver img{ width:100%; }
 
-/* ===== 下ボタン ===== */
+/* ===== 下ボタン（ここ修正） ===== */
 .bottom{
   position:absolute;
-  bottom:30px;
+  bottom:0;
   width:100%;
+  height:200px; /* ←これ重要 */
 }
 
+/* ボタン */
 .btn{
   position:absolute;
   width:280px;
+  height:200px;
+  position:relative; /* ←priceの基準 */
 }
+
 .btn:nth-child(1){ left:40px; }
 .btn:nth-child(2){ left:360px; }
 .btn:nth-child(3){ left:680px; }
 .btn:nth-child(4){ left:1000px; }
 
-.btn img{ width:100%; }
+.btn img{
+  position:absolute;
+  bottom:0;
+  width:100%;
+}
 
+/* 価格（ここ修正） */
 .price{
   position:absolute;
-  bottom:10px;
+  bottom:20px; /* ←ちゃんと中に入る */
   left:50%;
   transform:translateX(-50%);
   color:#fff;
   font-size:24px;
+  text-shadow:2px 2px 0 #000;
 }
 </style>
 </head>
@@ -156,10 +165,27 @@ body{
 </div>
 
 <div class="bottom">
-  <div class="btn" onclick="upgrade()"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
-  <div class="btn" onclick="hire()"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
-  <div class="btn" onclick="train()"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
-  <div class="btn" onclick="build()"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
+
+  <div class="btn" onclick="upgrade()">
+    <img src="btn_upgrade2.png">
+    <div class="price" id="priceCost"></div>
+  </div>
+
+  <div class="btn" onclick="hire()">
+    <img src="btn_worker2.png">
+    <div class="price" id="workerCost"></div>
+  </div>
+
+  <div class="btn" onclick="train()">
+    <img src="btn_training2.png">
+    <div class="price" id="trainCost"></div>
+  </div>
+
+  <div class="btn" onclick="build()">
+    <img src="btn_factory2.png">
+    <div class="price" id="factoryCost"></div>
+  </div>
+
 </div>
 
 </div>
@@ -168,31 +194,19 @@ body{
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1;
 let autoBuffer=0;
 
-/* ===== フォーマット ===== */
 function formatMoney(num){
   if(num>=1e8) return (num/1e8).toFixed(2)+"億円";
   if(num>=1e4) return (num/1e4).toFixed(2)+"万円";
   return Math.floor(num)+"円";
 }
 
-/* ===== 生産 ===== */
 function getGain(){
   return (worker*0.2*workerLv)+(factory*1.5);
 }
 
-/* ===== エフェクト関数 ===== */
+/* エフェクト */
 function hatEffect(x,y,val){
   spawnPop(x,y,"+"+val);
-
-  for(let i=0;i<5;i++){
-    let s=document.createElement("div");
-    s.className="spark";
-    s.style.left=(x+Math.random()*200)+"px";
-    s.style.top=(y+Math.random()*150)+"px";
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(),600);
-  }
-
   hatBtn.style.transform="scale(0.9)";
   setTimeout(()=>hatBtn.style.transform="scale(1)",80);
 }
@@ -207,7 +221,6 @@ function spawnPop(x,y,text){
   setTimeout(()=>p.remove(),800);
 }
 
-/* ===== クリック ===== */
 hatBtn.onclick=()=>{
   hats++;
   let rect=hatBtn.getBoundingClientRect();
@@ -215,7 +228,6 @@ hatBtn.onclick=()=>{
   update();
 };
 
-/* ===== 自動 ===== */
 setInterval(()=>{
   let gain=getGain();
   hats+=gain;
@@ -230,14 +242,12 @@ setInterval(()=>{
   update();
 },500);
 
-/* ===== 納品 ===== */
 function sellAll(){
   money+=Math.floor(hats*price);
   hats=0;
   update();
 }
 
-/* ===== 強化 ===== */
 function upgrade(){
   let cost=Math.floor(500*Math.pow(1.5,(price-100)/20));
   if(money>=cost){money-=cost;price+=20;}
@@ -258,13 +268,10 @@ function build(){
   if(money>=cost){money-=cost;factory++;}
 }
 
-/* ===== 保存 ===== */
 function saveGame(){
   localStorage.setItem("save",JSON.stringify({money,hats,price,worker,factory,workerLv}));
-  alert("保存しました");
 }
 
-/* ===== 読込 ===== */
 (function(){
   let s=localStorage.getItem("save");
   if(s){
@@ -278,7 +285,6 @@ function saveGame(){
   }
 })();
 
-/* ===== 更新 ===== */
 function update(){
   moneyEl.innerText="所持金："+formatMoney(money);
   hatEl.innerText=Math.floor(hats);
