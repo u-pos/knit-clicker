@@ -215,8 +215,11 @@ function sellAll(){
 
 /* 強化 */
 function upgrade(){
-  let c=price*5;
-  if(money>=c){money-=c;price+=10;}
+  let cost = Math.floor(price * 8);
+  if(money >= cost){
+    money -= cost;
+    price = Math.floor(price * 1.2);
+  }
 }
 
 function hire(){
