@@ -227,20 +227,26 @@ hatBtn.onclick=()=>{
   update();
 };
 
+let autoBuffer = 0; // ←追加
+
 setInterval(()=>{
   let gain = worker*0.05 + factory*0.1;
+
   hats += gain;
+  autoBuffer += gain;
 
-  let displayGain = Math.floor(gain);
+  let trigger = Math.floor(autoBuffer);
 
-  if(displayGain >= 1){
+  if(trigger >= 1){
+
+    autoBuffer -= trigger; // ←消費
 
     let rect = hatBtn.getBoundingClientRect();
 
     // ポップ
-    spawnPop(rect.left+150, rect.top+120, "+"+displayGain);
+    spawnPop(rect.left+150, rect.top+120, "+"+trigger);
 
-    // キラキラ（クリックと同じ）
+    // キラキラ
     for(let i=0;i<5;i++){
       let s=document.createElement("div");
       s.className="spark";
@@ -250,7 +256,7 @@ setInterval(()=>{
       setTimeout(()=>s.remove(),600);
     }
 
-    // 軽く縮小（クリック感）
+    // 押された感
     hatBtn.style.transform="scale(0.9)";
     setTimeout(()=>hatBtn.style.transform="scale(1)",80);
   }
