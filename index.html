@@ -24,38 +24,42 @@ body{
   overflow:hidden;
 }
 
-/* 背景 */
 .bg{
   width:1280px;
   height:720px;
   position:absolute;
 }
 
-/* ===== 左パネル（完全作り直し） ===== */
+/* ===== 左パネル ===== */
 .panel{
   position:absolute;
   top:20px;
   left:20px;
-  width:260px;
-  padding:15px;
-  background:rgba(0,0,0,0.8);
-  border:2px solid #555;
-  border-radius:10px;
+  width:280px;
+  padding:18px;
+  background:rgba(0,0,0,0.85);
+  border:2px solid #666;
+  border-radius:12px;
   box-sizing:border-box;
 }
 
 .panel-text{
   color:#ffd700;
-  font-size:18px;
-  line-height:2.2;
+  font-size:22px; /* ←アップ */
+  line-height:2.3;
   text-shadow:2px 2px 0 #000;
-  word-break:break-all; /* ←桁あふれ対策 */
 }
 
-/* ===== ニット（さらに上へ） ===== */
+/* 所持金だけ強調 */
+#money{
+  font-size:28px;
+  font-weight:bold;
+}
+
+/* ===== ニット ===== */
 .hat{
   position:absolute;
-  top:170px; /* ←さらに上げた */
+  top:170px;
   left:540px;
   width:360px;
   cursor:pointer;
@@ -114,15 +118,18 @@ body{
   width:280px;
 }
 
-/* 金額 */
+/* ===== 価格（ここ強化） ===== */
 .price{
   position:absolute;
-  bottom:-10px;
+  bottom:-12px;
   left:50%;
   transform:translateX(-50%);
   color:#fff;
-  font-size:20px;
-  text-shadow:2px 2px 0 #000;
+  font-size:26px; /* ←アップ */
+  font-weight:bold;
+  text-shadow:
+    2px 2px 0 #000,
+    0 0 6px #000;
 }
 </style>
 </head>
@@ -133,7 +140,7 @@ body{
 
 <img src="bg.jpg" class="bg">
 
-<!-- 左UI -->
+<!-- 左 -->
 <div class="panel">
   <div class="panel-text">
     <div id="money">所持金：0円</div>
