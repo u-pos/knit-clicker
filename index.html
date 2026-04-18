@@ -24,9 +24,13 @@ body{
   overflow:hidden;
 }
 
-.bg{ position:absolute; width:100%; height:100%; }
+.bg{
+  position:absolute;
+  width:100%;
+  height:100%;
+}
 
-/* パネル */
+/* ===== 左パネル ===== */
 .panel{
   position:absolute;
   top:20px;
@@ -42,27 +46,32 @@ body{
   color:#ffd700;
   font-size:22px;
   line-height:2.3;
-  text-shadow:2px 2px 0 #000;
 }
 
-/* ニット */
+/* ===== ニット ===== */
 .hat{
   position:absolute;
   top:170px;
   left:540px;
   width:360px;
   cursor:pointer;
-  transition:transform 0.1s;
 }
 
-/* ボタン */
-.btn img{ transition:transform 0.08s; }
-.btn:active img{ transform:scale(0.9); }
+/* ===== 納品ボタン ===== */
+.deliver{
+  position:absolute;
+  top:20px;
+  right:40px;
+  width:260px;
+}
+.deliver img{ width:100%; }
 
+/* ===== 下ボタン ===== */
 .bottom{
   position:absolute;
   bottom:30px;
   width:100%;
+  height:200px;
 }
 
 .btn{
@@ -74,16 +83,19 @@ body{
 .btn:nth-child(3){ left:680px; }
 .btn:nth-child(4){ left:1000px; }
 
+.btn img{ width:100%; }
+
+/* 価格 */
 .price{
   position:absolute;
-  bottom:15px;
+  bottom:10px;
   left:50%;
   transform:translateX(-50%);
   color:#fff;
-  font-size:26px;
+  font-size:24px;
 }
 
-/* 保存ボタン */
+/* 保存 */
 .save{
   position:absolute;
   bottom:10px;
@@ -102,6 +114,7 @@ body{
 
 <img src="bg.jpg" class="bg">
 
+<!-- 左 -->
 <div class="panel">
   <div class="panel-text">
     <div id="money">所持金：0円</div>
@@ -112,13 +125,37 @@ body{
   </div>
 </div>
 
+<!-- ニット -->
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
+<!-- 納品 -->
+<div class="deliver" onclick="sellAll()">
+  <img src="btn_deliver2.png">
+</div>
+
+<!-- 下 -->
 <div class="bottom">
-  <div class="btn" onclick="upgrade()"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
-  <div class="btn" onclick="hire()"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
-  <div class="btn" onclick="train()"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
-  <div class="btn" onclick="build()"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
+
+  <div class="btn" onclick="upgrade()">
+    <img src="btn_upgrade2.png">
+    <div class="price" id="priceCost"></div>
+  </div>
+
+  <div class="btn" onclick="hire()">
+    <img src="btn_worker2.png">
+    <div class="price" id="workerCost"></div>
+  </div>
+
+  <div class="btn" onclick="train()">
+    <img src="btn_training2.png">
+    <div class="price" id="trainCost"></div>
+  </div>
+
+  <div class="btn" onclick="build()">
+    <img src="btn_factory2.png">
+    <div class="price" id="factoryCost"></div>
+  </div>
+
 </div>
 
 <div class="save" onclick="saveGame()">保存して終了</div>
@@ -127,9 +164,8 @@ body{
 
 <script>
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1;
-let autoBuffer=0;
 
-/* ===== 数値フォーマット ===== */
+/* ===== 表示 ===== */
 function formatMoney(num){
   if(num>=100000000) return (num/100000000).toFixed(2)+"億円";
   if(num>=10000) return (num/10000).toFixed(2)+"万円";
@@ -138,36 +174,29 @@ function formatMoney(num){
 
 /* ===== 生産 ===== */
 function getGain(){
-  return (worker * 0.2 * workerLv) + (factory * 1.5);
+  return (worker*0.2*workerLv)+(factory*1.5);
 }
 
 /* ===== クリック ===== */
-hatBtn.onclick=()=>{
-  hats++;
-  update();
-};
+hatBtn.onclick=()=>{ hats++; update(); };
 
 /* ===== 自動 ===== */
 setInterval(()=>{
-  let gain=getGain();
-  hats+=gain;
-  autoBuffer+=gain;
-
-  let trigger=Math.floor(autoBuffer);
-  if(trigger>=1){
-    autoBuffer-=trigger;
-  }
-
+  hats+=getGain();
   update();
 },500);
 
-/* ===== コスト調整（ここ重要） ===== */
+/* ===== 納品 ===== */
+function sellAll(){
+  money+=Math.floor(hats*price);
+  hats=0;
+  update();
+}
+
+/* ===== 強化 ===== */
 function upgrade(){
-  let cost = Math.floor(500 * Math.pow(1.5, (price-100)/20));
-  if(money>=cost){
-    money-=cost;
-    price+=20;
-  }
+  let cost=Math.floor(500*Math.pow(1.5,(price-100)/20));
+  if(money>=cost){money-=cost;price+=20;}
 }
 
 function hire(){
@@ -185,34 +214,20 @@ function build(){
   if(money>=cost){money-=cost;factory++;}
 }
 
-/* ===== 納品 ===== */
-function sellAll(){
-  money+=Math.floor(hats*price);
-  hats=0;
-}
-
 /* ===== 保存 ===== */
 function saveGame(){
-  localStorage.setItem("knitSave",JSON.stringify({
-    money,hats,price,worker,factory,workerLv
-  }));
-  alert("保存しました");
+  localStorage.setItem("save",JSON.stringify({money,hats,price,worker,factory,workerLv}));
 }
 
-/* ===== 読み込み ===== */
-function loadGame(){
-  let data=localStorage.getItem("knitSave");
-  if(data){
-    let d=JSON.parse(data);
-    money=d.money;
-    hats=d.hats;
-    price=d.price;
-    worker=d.worker;
-    factory=d.factory;
-    workerLv=d.workerLv;
+/* ===== 読込 ===== */
+(function(){
+  let s=localStorage.getItem("save");
+  if(s){
+    let d=JSON.parse(s);
+    money=d.money; hats=d.hats; price=d.price;
+    worker=d.worker; factory=d.factory; workerLv=d.workerLv;
   }
-}
-loadGame();
+})();
 
 /* ===== 更新 ===== */
 function update(){
