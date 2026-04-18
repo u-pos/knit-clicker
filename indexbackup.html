@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ニットクリッカー</title>
+  <style>
+    :root{--bg1:#12314f;--bg2:#071520;--panel:rgba(7,21,32,.86);--line:rgba(255,255,255,.1);--text:#f8fafc;--muted:#c3d1dc;--accent:#f3c54b;--money:#90f2a9;--shadow:0 24px 48px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;font-family:"Yu Gothic UI","Meiryo",sans-serif;color:var(--text);background:radial-gradient(circle at top left,rgba(243,197,75,.22),transparent 24%),linear-gradient(180deg,var(--bg1),var(--bg2))}
+    button{font:inherit}img{display:block;max-width:100%}.app{width:min(1160px,calc(100% - 24px));margin:0 auto;padding:22px 0 28px}.topbar{display:grid;gap:14px;margin-bottom:18px}.headline{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap}.headline h1{margin:0;font-size:clamp(2rem,4.6vw,3.4rem);line-height:.95}.headline p{margin:8px 0 0;max-width:620px;color:var(--muted);line-height:1.6}
+    .banner,.panel{background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}.banner{padding:14px 16px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(243,197,75,.2),rgba(255,255,255,.04))}
+    .layout{display:grid;grid-template-columns:minmax(340px,1.12fr) minmax(310px,.88fr);gap:18px}.play{padding:20px}.side{padding:18px;display:grid;gap:16px}
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}.stat{padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.label{display:block;margin-bottom:8px;color:var(--muted);font-size:.82rem;letter-spacing:.08em;text-transform:uppercase}.value{font-size:clamp(1.2rem,3vw,2rem);font-weight:800;line-height:1.05}.sub{margin-top:6px;color:#e2ebf2;font-size:.92rem}
+    .zone{position:relative;min-height:390px;display:grid;place-items:center;padding:18px;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015)),radial-gradient(circle at center,rgba(243,197,75,.1),transparent 50%);overflow:hidden}.ring{position:absolute;inset:50%;width:360px;height:360px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,255,255,.06),transparent 60%),radial-gradient(circle,rgba(243,197,75,.16),transparent 76%);filter:blur(4px)}
+    .hatbtn{position:relative;width:min(78vw,320px);aspect-ratio:1/1;border:none;background:transparent;cursor:pointer;touch-action:manipulation;transition:transform .12s ease;z-index:1}.hatbtn:hover{transform:translateY(-4px) scale(1.01)}.hatbtn.pressed{transform:scale(.94)}.hat{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 34px rgba(0,0,0,.34));user-select:none;-webkit-user-drag:none}
+    .helper{margin-top:16px;min-height:46px;text-align:center;color:var(--muted);line-height:1.5}.combo{margin-top:12px;display:grid;gap:8px}.combohead{display:flex;justify-content:space-between;gap:10px;color:#fff0b8;font-size:.92rem;font-weight:700}.meter{height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08)}.fill{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f3c54b,#ffe080);transition:width .12s linear}
+    .float{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}.num{position:absolute;font-weight:800;font-size:1.08rem;white-space:nowrap;animation:rise 1s ease-out forwards;text-shadow:0 3px 10px rgba(0,0,0,.35)}.num.crit{color:#fff1ab;font-size:1.34rem}.num.money{color:var(--money)}
+    .title{margin:0 0 10px;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;color:#f6e8b6}.grid{display:grid;gap:12px}.btn{width:100%;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.045);color:var(--text);text-align:left;cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease}.btn:hover:not(:disabled){transform:translateY(-2px);border-color:rgba(243,197,75,.42);background:rgba(243,197,75,.08)}.btn:disabled{cursor:not-allowed;opacity:.55;filter:grayscale(.1)}.top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:8px}.cost{color:#ffe39b;font-weight:800;white-space:nowrap}.btn p{margin:0;color:var(--muted);line-height:1.45;font-size:.92rem}
+    .up{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;align-items:center}.icon{width:76px;height:76px;border-radius:16px;background:rgba(255,255,255,.05);object-fit:contain;padding:8px}.status{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cell{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08)}.cell span{display:block;color:var(--muted);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}.cell strong{font-size:1.05rem}
+    .offline{display:flex;gap:12px;align-items:center;padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.offline b{display:block;margin-bottom:4px;color:#fff4c6}.offline p{margin:0;color:var(--muted);line-height:1.5;font-size:.9rem}.badge{width:52px;height:52px;border-radius:14px;background:rgba(243,197,75,.14);display:grid;place-items:center;font-size:1.4rem;flex:none}
+    .foot{margin-top:16px;text-align:center;color:rgba(255,255,255,.62);font-size:.86rem}
+    @keyframes rise{0%{transform:translate(-50%,0) scale(.85);opacity:0}15%{opacity:1}100%{transform:translate(-50%,-76px) scale(1.08);opacity:0}}
+    @media (max-width:940px){.layout{grid-template-columns:1fr}.zone{min-height:340px}}@media (max-width:560px){.app{width:min(100%,calc(100% - 16px));padding-top:16px}.play,.side{padding:14px}.stats,.status{grid-template-columns:1fr}.up{grid-template-columns:62px minmax(0,1fr)}.icon{width:62px;height:62px}.hatbtn{width:min(82vw,270px)}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="headline">
+        <div>
+          <h1>ニット帽クリッカー</h1>
+          <p>黄色いニット帽をクリックしてクリックポイントを集め、ニット帽に仕立てて売り、お金を増やして編み物帝国を育てる放置系ゲームです。</p>
+        </div>
+        <div class="banner">
+          <strong id="prestigeSummary">転生ボーナス x1.00</strong>
+          <span id="saveStatus">自動セーブ中...</span>
+        </div>
+      </div>
+    </header>
+    <section class="layout">
+      <section class="panel play">
+        <div class="stats">
+          <article class="stat"><span class="label">Click Points</span><div class="value" id="clickPointsValue">0</div><div class="sub" id="clickRateValue">作業員から毎秒 0</div></article>
+          <article class="stat"><span class="label">Knit Hats</span><div class="value" id="hatsValue">0</div><div class="sub">10クリックポイントでニット帽1個</div></article>
+          <article class="stat"><span class="label">Money</span><div class="value" id="yenValue">¥0</div><div class="sub" id="totalEarnedValue">累計売上 ¥0</div></article>
+          <article class="stat"><span class="label">Combo</span><div class="value" id="comboValue">x1.00</div><div class="sub" id="critValue">クリティカル率 5%</div></article>
+        </div>
+        <div class="zone" id="clickZone">
+          <div class="ring"></div>
+          <button class="hatbtn" id="hatButton" type="button" aria-label="ニット帽をクリック"><img class="hat" src="./knit-hat-v2.png" alt="黄色いニット帽"></button>
+          <div class="float" id="floatLayer"></div>
+        </div>
+        <div class="helper" id="helperText">テンポよくクリックするとコンボ倍率が上がります。たまに10倍のクリティカルも発生します。</div>
+        <div class="combo"><div class="combohead"><span id="comboName">コンボ熱量</span><span id="comboTimer">準備OK</span></div><div class="meter"><div class="fill" id="comboFill"></div></div></div>
+      </section>
+      <aside class="panel side">
+        <section>
+          <h2 class="title">アクション</h2>
+          <div class="grid">
+            <button class="btn" id="sellOneButton" type="button"><div class="top"><strong>ニット帽を1個売る</strong><span class="cost">+¥100</span></div><p>ニット帽1個をすぐに現金化します。</p></button>
+            <button class="btn" id="sellAllButton" type="button"><div class="top"><strong>ニット帽を全部売る</strong><span class="cost" id="sellAllValue">+¥0</span></div><p>今ある在庫を一気に売却します。</p></button>
+            <button class="btn" id="prestigeButton" type="button"><div class="top"><strong>転生してやり直す</strong><span class="cost" id="prestigeGain">+0</span></div><p>進行をリセットし、累計売上に応じた恒久倍率を得ます。</p></button>
+          </div>
+        </section>
+        <section><h2 class="title">設備と人員</h2><div class="grid" id="upgradeList"></div></section>
+        <section>
+          <h2 class="title">生産状況</h2>
+          <div class="status">
+            <div class="cell"><span>アルバイトの数</span><strong id="workersOwned">0人</strong></div>
+            <div class="cell"><span>作業員レベル</span><strong id="workerPower">1クリック/秒</strong></div>
+            <div class="cell"><span>工場数</span><strong id="factoriesOwned">0棟</strong></div>
+            <div class="cell"><span>帽子生産</span><strong id="hatRate">0個/秒</strong></div>
+          </div>
+        </section>
+        <section>
+          <h2 class="title">オフライン進行</h2>
+          <div class="offline"><div class="badge">💾</div><div><b id="offlineTitle">ブラウザを閉じても自動保存</b><p id="offlineSummary">PCブラウザで遊べるように、保存データは自動でローカルに保存されます。翌日再開したときは、前回終了後の自動生産も一部反映されます。</p></div></div>
+        </section>
+      </aside>
+    </section>
+    <p class="foot">このゲームはブラウザ内の保存領域を使って自動セーブします。</p>
+  </main>
+  <script>
+    (()=>{"use strict";
+      const SAVE_KEY="knit-hat-clicker-save-v2",HAT_POINT_COST=10,HAT_SELL_VALUE=100,CRIT_CHANCE=.05,CRIT_MULTIPLIER=10,COMBO_TIMEOUT=2.2,MAX_COMBO_STACKS=30,TICK_MS=100,MAX_OFFLINE_SECONDS=28800;
+      const $=id=>document.getElementById(id),el={hatButton:$("hatButton"),clickZone:$("clickZone"),floatLayer:$("floatLayer"),helperText:$("helperText"),clickPointsValue:$("clickPointsValue"),clickRateValue:$("clickRateValue"),hatsValue:$("hatsValue"),yenValue:$("yenValue"),totalEarnedValue:$("totalEarnedValue"),comboValue:$("comboValue"),critValue:$("critValue"),comboFill:$("comboFill"),comboTimer:$("comboTimer"),comboName:$("comboName"),sellOneButton:$("sellOneButton"),sellAllButton:$("sellAllButton"),sellAllValue:$("sellAllValue"),prestigeButton:$("prestigeButton"),prestigeGain:$("prestigeGain"),prestigeSummary:$("prestigeSummary"),saveStatus:$("saveStatus"),upgradeList:$("upgradeList"),workersOwned:$("workersOwned"),workerPower:$("workerPower"),factoriesOwned:$("factoriesOwned"),hatRate:$("hatRate"),offlineTitle:$("offlineTitle"),offlineSummary:$("offlineSummary")};
+      const safe=n=>Number.isFinite(Number(n))?Number(n):0;
+      const initial=()=>({clickPoints:0,hats:0,yen:0,lifetimeYen:0,workers:0,workerUpgrades:0,factories:0,prestigePoints:0,comboStacks:0,comboExpiresAt:0,lastTickAt:Date.now(),lastSaveAt:0,lastActiveAt:Date.now(),lastOfflineSummary:""});
+      let state=load(),renderQueued=false;
+      const upgrades=[
+        {id:"worker",name:"作業員",description:"毎秒1クリックポイントを自動で生み出します。",baseCost:500,growth:1.18,image:"./worker.png",owned:c=>`${fmtInt(c)}人`,extra:()=>"",buy:s=>s.workers+=1},
+        {id:"workerUpgrade",name:"作業員強化",description:"すべての作業員の生産力を2倍にします。",baseCost:2000,growth:2.3,image:"./kyouka.png",owned:c=>`${fmtInt(c)}回`,extra:()=>`現在の作業員倍率 x${fmt(workerUnitPower()*2)}`,buy:s=>s.workerUpgrades+=1},
+        {id:"factory",name:"工場",description:"毎秒1個のニット帽を自動生産します。",baseCost:10000,growth:1.22,image:"./factory.png",owned:c=>`${fmtInt(c)}棟`,extra:()=>"",buy:s=>s.factories+=1}
+      ];
+      function load(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return initial();const p=JSON.parse(raw),b=initial();return {...b,...p,clickPoints:safe(p.clickPoints),hats:safe(p.hats),yen:safe(p.yen),lifetimeYen:safe(p.lifetimeYen),workers:Math.floor(safe(p.workers)),workerUpgrades:Math.floor(safe(p.workerUpgrades)),factories:Math.floor(safe(p.factories)),prestigePoints:Math.floor(safe(p.prestigePoints)),comboStacks:Math.floor(safe(p.comboStacks)),comboExpiresAt:safe(p.comboExpiresAt),lastTickAt:Date.now(),lastSaveAt:0,lastActiveAt:safe(p.lastActiveAt)||Date.now(),lastOfflineSummary:typeof p.lastOfflineSummary==="string"?p.lastOfflineSummary:""}}catch{return initial()}}
+      function save(){const now=Date.now();state.lastSaveAt=now;state.lastActiveAt=now;localStorage.setItem(SAVE_KEY,JSON.stringify({clickPoints:state.clickPoints,hats:state.hats,yen:state.yen,lifetimeYen:state.lifetimeYen,workers:state.workers,workerUpgrades:state.workerUpgrades,factories:state.factories,prestigePoints:state.prestigePoints,comboStacks:state.comboStacks,comboExpiresAt:state.comboExpiresAt,lastActiveAt:state.lastActiveAt,lastOfflineSummary:state.lastOfflineSummary}));el.saveStatus.textContent=`最終保存: ${new Date(now).toLocaleString("ja-JP")}`}
+      function prestigeMultiplier(){return 1+state.prestigePoints*.1} function workerUnitPower(){return Math.pow(2,state.workerUpgrades)} function totalClickRate(){return state.workers*workerUnitPower()*prestigeMultiplier()} function totalHatRate(){return state.factories*prestigeMultiplier()}
+      function getCount(id){if(id==="worker")return state.workers;if(id==="workerUpgrade")return state.workerUpgrades;if(id==="factory")return state.factories;return 0}
+      function cost(u){return Math.floor(u.baseCost*Math.pow(u.growth,getCount(u.id)))} function comboMul(){return 1+Math.min(state.comboStacks,MAX_COMBO_STACKS)*.08} function prestigeGain(){return Math.max(0,Math.floor(Math.sqrt(state.lifetimeYen/5000))-state.prestigePoints)}
+      function normalize(){if(state.clickPoints>=HAT_POINT_COST){const made=Math.floor(state.clickPoints/HAT_POINT_COST);state.clickPoints-=made*HAT_POINT_COST;state.hats+=made}}
+      function addClicks(n){state.clickPoints+=n;normalize()} function addHats(n){state.hats+=n} function addYen(n){if(n<=0)return;state.yen+=n;state.lifetimeYen+=n} function spend(n){if(state.yen<n)return false;state.yen-=n;return true}
+      function applyOffline(){const sec=Math.max(0,Math.min(MAX_OFFLINE_SECONDS,(Date.now()-state.lastActiveAt)/1000));if(sec<5){state.lastOfflineSummary="まだ再開直後なので、オフライン進行はありません。";return} const clickGain=totalClickRate()*sec,hatGain=totalHatRate()*sec;addClicks(clickGain);addHats(hatGain);state.lastOfflineSummary=`${dur(sec)}の間に、クリックポイント ${fmt(clickGain)} とニット帽 ${fmt(hatGain)} を自動生産しました。`}
+      function queue(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;render()})}
+      function animate(){el.hatButton.classList.remove("pressed");void el.hatButton.offsetWidth;el.hatButton.classList.add("pressed");setTimeout(()=>el.hatButton.classList.remove("pressed"),100)}
+      function floatNum(event,text,variant){const rect=el.clickZone.getBoundingClientRect(),node=document.createElement("div");node.className=`num ${variant}`.trim();node.textContent=text;const x=event&&Number.isFinite(event.clientX)?event.clientX-rect.left:rect.width/2,y=event&&Number.isFinite(event.clientY)?event.clientY-rect.top:rect.height*.52;node.style.left=`${x}px`;node.style.top=`${y}px`;el.floatLayer.appendChild(node);setTimeout(()=>node.remove(),1000)}
+      function clickHat(event){const now=Date.now();state.comboStacks=now<state.comboExpiresAt?Math.min(state.comboStacks+1,MAX_COMBO_STACKS):1;state.comboExpiresAt=now+COMBO_TIMEOUT*1000;const crit=Math.random()<CRIT_CHANCE,amount=prestigeMultiplier()*comboMul()*(crit?CRIT_MULTIPLIER:1);addClicks(amount);animate();floatNum(event,`+${fmt(amount)} CP`,crit?"crit":"");el.helperText.textContent=crit?"クリティカル発生。クリックポイントが10倍になりました。":state.comboStacks>=8?"コンボが育っています。このまま連打で一気に伸ばせます。":"テンポよくクリックするとコンボ倍率が上がります。";queue()}
+      function sell(count){const actual=Math.min(Math.floor(state.hats),count);if(actual<=0)return;state.hats-=actual;const earned=actual*HAT_SELL_VALUE;addYen(earned);floatNum(null,`+¥${fmt(earned)}`,"money");el.helperText.textContent=actual>1?`${actual}個のニット帽を売って ¥${fmt(earned)} を獲得しました。`:"ニット帽を1個売って現金化しました。";queue()}
+      function buy(id){const u=upgrades.find(x=>x.id===id);if(!u)return;const c=cost(u);if(!spend(c))return;u.buy(state);el.helperText.textContent=`${u.name}を購入しました。自動生産が強くなりました。`;queue()}
+      function prestige(){const gain=prestigeGain();if(gain<=0)return;state={...initial(),prestigePoints:state.prestigePoints+gain,lifetimeYen:state.lifetimeYen,lastOfflineSummary:`転生して恒久倍率を +${gain*10}% 強化しました。`};el.helperText.textContent=`転生完了。恒久倍率が +${gain*10}% 上昇しました。`;save();queue()}
+      function tick(){const now=Date.now(),delta=Math.min(1,(now-state.lastTickAt)/1000);state.lastTickAt=now;if(delta>0){addClicks(totalClickRate()*delta);addHats(totalHatRate()*delta)} if(now>=state.comboExpiresAt)state.comboStacks=0;if(now-state.lastSaveAt>=3000)save();queue();setTimeout(tick,TICK_MS)}
+      function fmtInt(v){return new Intl.NumberFormat("ja-JP",{maximumFractionDigits:0}).format(v)} function fmtNum(v,d=0){return new Intl.NumberFormat("ja-JP",{minimumFractionDigits:d,maximumFractionDigits:d}).format(v)}
+      function fmt(v){const a=Math.abs(v);if(a>=1e8)return`${(v/1e8).toFixed(2)}億`;if(a>=1e4)return`${(v/1e4).toFixed(2)}万`;if(a>=1e3)return fmtNum(v,0);return fmtNum(v,v%1===0?0:1)}
+      function dur(sec){const t=Math.floor(sec),h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return h>0?`${h}時間${m}分`:m>0?`${m}分${s}秒`:`${s}秒`}
+      function renderUpgrades(){el.upgradeList.innerHTML="";upgrades.forEach(u=>{const c=cost(u),owned=getCount(u.id),extra=u.extra(),b=document.createElement("button");b.type="button";b.className="btn";b.disabled=state.yen<c;b.dataset.upgradeId=u.id;b.innerHTML=`<div class="up"><img class="icon" src="${u.image}" alt="${u.name}"><div><div class="top"><strong>${u.name}</strong><span class="cost">¥${fmt(c)}</span></div><p>${u.description}</p><p>所持: ${u.owned(owned)}${extra?` ・ ${extra}`:""}</p></div></div>`;el.upgradeList.appendChild(b)})}
+      function render(){normalize();const combo=comboMul(),remain=Math.max(0,state.comboExpiresAt-Date.now()),progress=Math.max(0,Math.min(100,remain/(COMBO_TIMEOUT*1000)*100)),gain=prestigeGain(),workerRate=totalClickRate(),hatRate=totalHatRate();el.clickPointsValue.textContent=fmt(state.clickPoints);el.clickRateValue.textContent=`作業員から毎秒 ${fmt(workerRate)} CP`;el.hatsValue.textContent=fmt(state.hats);el.yenValue.textContent=`¥${fmt(state.yen)}`;el.totalEarnedValue.textContent=`累計売上 ¥${fmt(state.lifetimeYen)}`;el.comboValue.textContent=`x${combo.toFixed(2)}`;el.critValue.textContent=`クリティカル率 ${Math.round(CRIT_CHANCE*100)}%`;el.comboFill.style.width=`${progress}%`;el.comboTimer.textContent=remain>0?`残り ${(remain/1000).toFixed(1)}秒`:"準備OK";el.comboName.textContent=state.comboStacks>0?`コンボ x${combo.toFixed(2)}`:"コンボ熱量";el.sellAllValue.textContent=`+¥${fmt(Math.floor(state.hats)*HAT_SELL_VALUE)}`;el.sellOneButton.disabled=state.hats<1;el.sellAllButton.disabled=state.hats<1;el.prestigeButton.disabled=gain<=0;el.prestigeGain.textContent=`+${gain}`;el.prestigeSummary.textContent=`転生ボーナス x${prestigeMultiplier().toFixed(2)}`;el.workersOwned.textContent=`${fmtInt(state.workers)}人`;el.workerPower.textContent=`${fmt(workerUnitPower()*prestigeMultiplier())}クリック/秒`;el.factoriesOwned.textContent=`${fmtInt(state.factories)}棟`;el.hatRate.textContent=`${fmt(hatRate)}個/秒`;el.offlineTitle.textContent=gain>0?`転生すると +${gain} 段階の恒久ボーナス`:"ブラウザを閉じても自動保存";el.offlineSummary.textContent=state.lastOfflineSummary||"PCブラウザで遊べるように、保存データは自動でローカルに保存されます。";renderUpgrades()}
+      el.hatButton.addEventListener("click",clickHat);el.sellOneButton.addEventListener("click",()=>sell(1));el.sellAllButton.addEventListener("click",()=>sell(Math.floor(state.hats)));el.prestigeButton.addEventListener("click",prestige);el.upgradeList.addEventListener("click",e=>{const b=e.target.closest("[data-upgrade-id]");if(b)buy(b.dataset.upgradeId)});window.addEventListener("beforeunload",save);document.addEventListener("visibilitychange",()=>{if(document.hidden)save();else state.lastTickAt=Date.now()});
+      applyOffline();render();save();tick();
+    })();
+  </script>
+</body>
+</html>
