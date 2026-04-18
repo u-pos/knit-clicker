@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ニット帽クリッカー</title>
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+/* 背景 */
+#game {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 左上ステータス */
+.ui-left {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  font-weight: bold;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.money {
+  font-size: 26px;
+}
+
+/* 右上ボタン */
+.deliver {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #2ecc71;
+  border: none;
+  padding: 14px 26px;
+  font-size: 18px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* ニット帽 */
+.hat {
+  position: absolute;
+  top: 130px;
+  left: 300px;
+  width: 320px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.hat:active {
+  transform: scale(0.9);
+}
+
+/* 下ボタン */
+.bottom {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+}
+
+.btn {
+  flex: 1;
+  padding: 20px;
+  font-size: 18px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.up { background: #8e44ad; }
+.worker { background: #2980b9; }
+.training { background: #e67e22; }
+.factory { background: #c0392b; }
+
+/* 保存 */
+.save {
+  position: absolute;
+  right: 20px;
+  bottom: 90px;
+  padding: 12px 20px;
+  font-size: 16px;
+  background: #555;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <img src="bg.jpg" class="bg">
+
+  <!-- UI -->
+  <div class="ui-left">
+    <div class="money" id="money">所持金: 0円</div>
+    <div>🧶 ニット帽: <span id="hatCount">0</span></div>
+    <div>💰 商品単価: <span id="price">10</span>円</div>
+    <div>👤 パート: <span id="worker">0</span>人 (LV.<span id="workerLv">1</span>)</div>
+    <div>🏭 工場数: <span id="factory">0</span></div>
+  </div>
+
+  <!-- 納品 -->
+  <button class="deliver" onclick="sellAll()">すべて納品</button>
+
+  <!-- ニット -->
+  <img src="knit-hat-v2.png" class="hat" id="hat">
+
+  <!-- 下ボタン -->
+  <div class="bottom">
+    <button class="btn up" onclick="upgradePrice()">商品単価UP</button>
+    <button class="btn worker" onclick="hire()">パートを雇う</button>
+    <button class="btn training" onclick="train()">強化合宿</button>
+    <button class="btn factory" onclick="build()">工場増設</button>
+  </div>
+
+  <button class="save" onclick="saveAndExit()">保存して終了</button>
+</div>
+
+<script>
+let money = 0;
+let hats = 0;
+let price = 10;
+let workers = 0;
+let workerLv = 1;
+let factories = 0;
+
+/* クリック */
+document.getElementById("hat").onclick = () => {
+  hats++;
+  update();
+};
+
+/* 自動生産 */
+setInterval(() => {
+  hats += workers * workerLv * 0.1;
+  hats += factories * 0.2;
+  update();
+}, 100);
+
+/* 納品 */
+function sellAll() {
+  money += Math.floor(hats * price);
+  hats = 0;
+  update();
+}
+
+/* 強化系（バランス調整済） */
+function upgradePrice() {
+  let cost = price * 50;
+  if (money >= cost) {
+    money -= cost;
+    price += 2;
+  }
+}
+
+function hire() {
+  let cost = 100 * (workers + 1);
+  if (money >= cost) {
+    money -= cost;
+    workers++;
+  }
+}
+
+function train() {
+  let cost = 500 * workerLv;
+  if (money >= cost) {
+    money -= cost;
+    workerLv++;
+  }
+}
+
+function build() {
+  let cost = 2000 * (factories + 1);
+  if (money >= cost) {
+    money -= cost;
+    factories++;
+  }
+}
+
+/* 表示更新 */
+function update() {
+  document.getElementById("money").innerText = "所持金: " + Math.floor(money) + "円";
+  document.getElementById("hatCount").innerText = Math.floor(hats);
+  document.getElementById("price").innerText = price;
+  document.getElementById("worker").innerText = workers;
+  document.getElementById("workerLv").innerText = workerLv;
+  document.getElementById("factory").innerText = factories;
+}
+
+/* 保存 */
+function saveAndExit() {
+  localStorage.setItem("save", JSON.stringify({
+    money, hats, price, workers, workerLv, factories
+  }));
+  alert("保存しました");
+}
+
+/* 読み込み */
+window.onload = () => {
+  let data = localStorage.getItem("save");
+  if (data) {
+    let s = JSON.parse(data);
+    money = s.money;
+    hats = s.hats;
+    price = s.price;
+    workers = s.workers;
+    workerLv = s.workerLv;
+    factories = s.factories;
+  }
+  update();
+};
+</script>
+
+</body>
+</html>
