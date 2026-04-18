@@ -44,7 +44,7 @@ body{
 
 .panel-text{
   color:#ffd700;
-  font-size:22px; /* 全部統一 */
+  font-size:22px;
   line-height:2.3;
   text-shadow:2px 2px 0 #000;
 }
@@ -57,9 +57,6 @@ body{
   width:360px;
   cursor:pointer;
   transition:transform 0.1s;
-}
-.hat:active{
-  transform:scale(0.9);
 }
 
 /* ===== ボタン押下 ===== */
@@ -112,7 +109,7 @@ body{
 /* ===== 下ボタン ===== */
 .bottom{
   position:absolute;
-  bottom:30px; /* ←近づけた */
+  bottom:30px;
   width:1280px;
   height:200px;
 }
@@ -121,7 +118,6 @@ body{
   position:absolute;
   width:280px;
 }
-
 .btn:nth-child(1){ left:40px; }
 .btn:nth-child(2){ left:360px; }
 .btn:nth-child(3){ left:680px; }
@@ -132,7 +128,7 @@ body{
 /* ===== 価格 ===== */
 .price{
   position:absolute;
-  bottom:15px; /* ←ボタンに寄せた */
+  bottom:15px;
   left:50%;
   transform:translateX(-50%);
   color:#fff;
@@ -196,6 +192,25 @@ body{
 
 <script>
 let money=0,hats=0,price=10,worker=0,factory=0,workerLv=1;
+let autoBuffer=0;
+
+/* ===== 共通エフェクト ===== */
+function hatEffect(x,y,value){
+
+  spawnPop(x,y,"+"+value);
+
+  for(let i=0;i<5;i++){
+    let s=document.createElement("div");
+    s.className="spark";
+    s.style.left=(x + Math.random()*200)+"px";
+    s.style.top=(y + Math.random()*150)+"px";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),600);
+  }
+
+  hatBtn.style.transform="scale(0.9)";
+  setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+}
 
 function spawnPop(x,y,text){
   let p=document.createElement("div");
@@ -207,28 +222,20 @@ function spawnPop(x,y,text){
   setTimeout(()=>p.remove(),800);
 }
 
+/* ===== 手動クリック ===== */
 hatBtn.onclick=()=>{
   hats++;
+
   clickSound.currentTime=0;
   clickSound.play();
 
   let rect=hatBtn.getBoundingClientRect();
-  spawnPop(rect.left+150, rect.top+100, "+1");
-
-  for(let i=0;i<5;i++){
-    let s=document.createElement("div");
-    s.className="spark";
-    s.style.left=(rect.left + Math.random()*200)+"px";
-    s.style.top=(rect.top + Math.random()*150)+"px";
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(),600);
-  }
+  hatEffect(rect.left+150, rect.top+100, 1);
 
   update();
 };
 
-let autoBuffer = 0; // ←追加
-
+/* ===== 自動 ===== */
 setInterval(()=>{
   let gain = worker*0.05 + factory*0.1;
 
@@ -237,33 +244,17 @@ setInterval(()=>{
 
   let trigger = Math.floor(autoBuffer);
 
-  if(trigger >= 1){
+  if(trigger>=1){
+    autoBuffer -= trigger;
 
-    autoBuffer -= trigger; // ←消費
-
-    let rect = hatBtn.getBoundingClientRect();
-
-    // ポップ
-    spawnPop(rect.left+150, rect.top+120, "+"+trigger);
-
-    // キラキラ
-    for(let i=0;i<5;i++){
-      let s=document.createElement("div");
-      s.className="spark";
-      s.style.left=(rect.left + Math.random()*200)+"px";
-      s.style.top=(rect.top + Math.random()*150)+"px";
-      document.body.appendChild(s);
-      setTimeout(()=>s.remove(),600);
-    }
-
-    // 押された感
-    hatBtn.style.transform="scale(0.9)";
-    setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+    let rect=hatBtn.getBoundingClientRect();
+    hatEffect(rect.left+150, rect.top+120, trigger);
   }
 
   update();
 },500);
 
+/* ===== ロジック ===== */
 function sellAll(){
   money += Math.floor(hats * price);
   hats=0;
@@ -275,6 +266,7 @@ function hire(){ let cost=100*(worker+1); if(money>=cost){money-=cost;worker++;}
 function train(){ let cost=500*(worker+1); if(money>=cost){money-=cost;workerLv++;} }
 function build(){ let cost=2000*(factory+1); if(money>=cost){money-=cost;factory++;} }
 
+/* ===== 更新 ===== */
 function update(){
   moneyEl.innerText="所持金："+Math.floor(money)+"円";
   hatEl.innerText=Math.floor(hats);
