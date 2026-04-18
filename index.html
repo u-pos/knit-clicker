@@ -17,7 +17,7 @@ body{
   font-family:'DotGothic16', sans-serif;
 }
 
-/* ===== ゲーム画面固定 ===== */
+/* ===== 画面固定 ===== */
 #game{
   width:1280px;
   height:720px;
@@ -27,24 +27,26 @@ body{
 
 /* 背景 */
 .bg{
-  position:absolute;
   width:1280px;
   height:720px;
+  position:absolute;
 }
 
-/* ===== 左パネル ===== */
+/* ===== 左パネル（サイズ強制） ===== */
 .panel{
   position:absolute;
   top:20px;
   left:20px;
-  width:260px;
+  width:260px; /* ←強制 */
 }
+
 .panel img{
-  width:100%;
+  width:260px; /* ←画像サイズ無視して固定 */
 }
+
 .panel-text{
   position:absolute;
-  top:40px;
+  top:45px;
   left:25px;
   color:#ffd700;
   font-size:20px;
@@ -52,7 +54,7 @@ body{
   text-shadow:2px 2px 0 #000;
 }
 
-/* ===== ニット帽（確定位置） ===== */
+/* ===== ニット ===== */
 .hat{
   position:absolute;
   top:260px;
@@ -64,14 +66,18 @@ body{
   transform:scale(0.9);
 }
 
-/* ===== 納品 ===== */
+/* ===== 納品ボタン（ここが今回の本命） ===== */
 .deliver{
   position:absolute;
   top:20px;
   right:40px;
-  width:260px;
-  cursor:pointer;
+  width:260px;  /* ←強制縮小 */
 }
+
+.deliver img{
+  width:260px; /* ←画像サイズ無視 */
+}
+
 .deliver-text{
   position:absolute;
   top:42px;
@@ -93,7 +99,6 @@ body{
 .btn{
   position:absolute;
   width:280px;
-  cursor:pointer;
 }
 
 .btn:nth-child(1){ left:40px; }
@@ -102,7 +107,7 @@ body{
 .btn:nth-child(4){ left:1000px; }
 
 .btn img{
-  width:100%;
+  width:280px;
 }
 
 /* ラベル */
@@ -135,7 +140,7 @@ body{
 
   <img src="bg.jpg" class="bg">
 
-  <!-- 左UI -->
+  <!-- 左 -->
   <div class="panel">
     <img src="panel_left.png">
     <div class="panel-text">
@@ -156,7 +161,7 @@ body{
     <div class="deliver-text">すべて納品</div>
   </div>
 
-  <!-- 下ボタン -->
+  <!-- 下 -->
   <div class="bottom">
 
     <div class="btn" onclick="upgrade()">
@@ -242,17 +247,18 @@ function build(){
   }
 }
 
+/* ===== 小数点完全排除 ===== */
 function update(){
-  moneyEl.innerText="所持金："+money+"円";
-  hatEl.innerText=hats;
-  priceEl.innerText=price;
-  workerEl.innerText=worker;
-  factoryEl.innerText=factory;
+  moneyEl.innerText="所持金："+Math.floor(money)+"円";
+  hatEl.innerText=Math.floor(hats);
+  priceEl.innerText=Math.floor(price);
+  workerEl.innerText=Math.floor(worker);
+  factoryEl.innerText=Math.floor(factory);
 
-  priceCost.innerText=(price*50)+"円";
-  workerCost.innerText=(100*(worker+1))+"円";
-  trainCost.innerText=(500*(worker+1))+"円";
-  factoryCost.innerText=(2000*(factory+1))+"円";
+  priceCost.innerText=Math.floor(price*50)+"円";
+  workerCost.innerText=Math.floor(100*(worker+1))+"円";
+  trainCost.innerText=Math.floor(500*(worker+1))+"円";
+  factoryCost.innerText=Math.floor(2000*(factory+1))+"円";
 }
 
 const moneyEl=document.getElementById("money");
