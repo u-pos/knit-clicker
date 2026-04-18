@@ -31,32 +31,31 @@ body{
   position:absolute;
 }
 
-/* ===== 左パネル修正 ===== */
+/* ===== 左パネル（完全作り直し） ===== */
 .panel{
   position:absolute;
   top:20px;
-  left:30px;
-  width:300px;
-}
-
-.panel img{
-  width:300px;
+  left:20px;
+  width:260px;
+  padding:15px;
+  background:rgba(0,0,0,0.8);
+  border:2px solid #555;
+  border-radius:10px;
+  box-sizing:border-box;
 }
 
 .panel-text{
-  position:absolute;
-  top:70px;  /* ←しっかり枠内へ */
-  left:40px;
-  font-size:18px;
-  line-height:2.0;
   color:#ffd700;
+  font-size:18px;
+  line-height:2.2;
   text-shadow:2px 2px 0 #000;
+  word-break:break-all; /* ←桁あふれ対策 */
 }
 
-/* ===== ニット（上に移動） ===== */
+/* ===== ニット（さらに上へ） ===== */
 .hat{
   position:absolute;
-  top:200px;  /* ←上げた */
+  top:170px; /* ←さらに上げた */
   left:540px;
   width:360px;
   cursor:pointer;
@@ -101,11 +100,9 @@ body{
   height:200px;
 }
 
-/* ボタン */
 .btn{
   position:absolute;
   width:280px;
-  background:none !important; /* ←白背景対策 */
 }
 
 .btn:nth-child(1){ left:40px; }
@@ -115,8 +112,6 @@ body{
 
 .btn img{
   width:280px;
-  background:transparent !important; /* ←強制透明 */
-  mix-blend-mode:multiply; /* ←応急処置（白抜き風） */
 }
 
 /* 金額 */
@@ -138,9 +133,8 @@ body{
 
 <img src="bg.jpg" class="bg">
 
-<!-- 左 -->
+<!-- 左UI -->
 <div class="panel">
-  <img src="panel_left.png">
   <div class="panel-text">
     <div id="money">所持金：0円</div>
     <div>ニット帽：<span id="hat">0</span></div>
