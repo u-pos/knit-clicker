@@ -229,11 +229,32 @@ hatBtn.onclick=()=>{
 
 setInterval(()=>{
   let gain = worker*0.05 + factory*0.1;
-  if(gain>0){
-    hats += gain;
-    let rect=hatBtn.getBoundingClientRect();
-    spawnPop(rect.left+150, rect.top+120, "+"+Math.floor(gain));
+  hats += gain;
+
+  let displayGain = Math.floor(gain);
+
+  if(displayGain >= 1){
+
+    let rect = hatBtn.getBoundingClientRect();
+
+    // ポップ
+    spawnPop(rect.left+150, rect.top+120, "+"+displayGain);
+
+    // キラキラ（クリックと同じ）
+    for(let i=0;i<5;i++){
+      let s=document.createElement("div");
+      s.className="spark";
+      s.style.left=(rect.left + Math.random()*200)+"px";
+      s.style.top=(rect.top + Math.random()*150)+"px";
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(),600);
+    }
+
+    // 軽く縮小（クリック感）
+    hatBtn.style.transform="scale(0.9)";
+    setTimeout(()=>hatBtn.style.transform="scale(1)",80);
   }
+
   update();
 },500);
 
