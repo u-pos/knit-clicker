@@ -35,25 +35,18 @@ body{
   position:absolute;
   top:20px;
   left:20px;
-  width:280px;
+  width:300px;
   padding:18px;
   background:rgba(0,0,0,0.85);
   border:2px solid #666;
   border-radius:12px;
-  box-sizing:border-box;
 }
 
 .panel-text{
   color:#ffd700;
-  font-size:22px; /* ←アップ */
+  font-size:22px; /* 全部統一 */
   line-height:2.3;
   text-shadow:2px 2px 0 #000;
-}
-
-/* 所持金だけ強調 */
-#money{
-  font-size:28px;
-  font-weight:bold;
 }
 
 /* ===== ニット ===== */
@@ -69,6 +62,29 @@ body{
   transform:scale(0.9);
 }
 
+/* ===== ボタン押下 ===== */
+.btn img{
+  transition:transform 0.08s;
+}
+.btn:active img{
+  transform:scale(0.9);
+}
+
+/* ===== ポップ ===== */
+.pop{
+  position:absolute;
+  color:#fff;
+  font-size:28px;
+  font-weight:bold;
+  pointer-events:none;
+  text-shadow:2px 2px 0 #000;
+  animation:popAnim 0.8s forwards;
+}
+@keyframes popAnim{
+  0%{opacity:1; transform:translateY(0);}
+  100%{opacity:0; transform:translateY(-60px);}
+}
+
 /* ===== キラキラ ===== */
 .spark{
   position:absolute;
@@ -79,7 +95,6 @@ body{
   border-radius:50%;
   animation:sparkle 0.6s ease-out forwards;
 }
-
 @keyframes sparkle{
   0%{transform:scale(0.5);opacity:1;}
   100%{transform:scale(1.5);opacity:0;}
@@ -92,14 +107,12 @@ body{
   right:40px;
   width:260px;
 }
-.deliver img{
-  width:260px;
-}
+.deliver img{ width:260px; }
 
 /* ===== 下ボタン ===== */
 .bottom{
   position:absolute;
-  bottom:0;
+  bottom:30px; /* ←近づけた */
   width:1280px;
   height:200px;
 }
@@ -114,22 +127,18 @@ body{
 .btn:nth-child(3){ left:680px; }
 .btn:nth-child(4){ left:1000px; }
 
-.btn img{
-  width:280px;
-}
+.btn img{ width:280px; }
 
-/* ===== 価格（ここ強化） ===== */
+/* ===== 価格 ===== */
 .price{
   position:absolute;
-  bottom:-12px;
+  bottom:15px; /* ←ボタンに寄せた */
   left:50%;
   transform:translateX(-50%);
   color:#fff;
-  font-size:26px; /* ←アップ */
+  font-size:26px;
   font-weight:bold;
-  text-shadow:
-    2px 2px 0 #000,
-    0 0 6px #000;
+  text-shadow:2px 2px 0 #000,0 0 6px #000;
 }
 </style>
 </head>
@@ -144,22 +153,19 @@ body{
 <div class="panel">
   <div class="panel-text">
     <div id="money">所持金：0円</div>
-    <div>ニット帽：<span id="hat">0</span></div>
+    <div>ニット帽：<span id="hat">0</span>個</div>
     <div>商品単価：<span id="price">10</span>円</div>
-    <div>パート：<span id="worker">0</span></div>
-    <div>工場数：<span id="factory">0</span></div>
+    <div>パート：<span id="worker">0</span>人（LV<span id="workerLv">1</span>）</div>
+    <div>工場数：<span id="factory">0</span>棟</div>
   </div>
 </div>
 
-<!-- ニット -->
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
-<!-- 納品 -->
 <div class="deliver" onclick="sellAll()">
   <img src="btn_deliver2.png">
 </div>
 
-<!-- 下 -->
 <div class="bottom">
 
   <div class="btn" onclick="upgrade()">
@@ -186,20 +192,34 @@ body{
 
 </div>
 
+<audio id="clickSound" src="click.mp3"></audio>
+
 <script>
-let money=0,hats=0,price=10,worker=0,factory=0;
+let money=0,hats=0,price=10,worker=0,factory=0,workerLv=1;
+
+function spawnPop(x,y,text){
+  let p=document.createElement("div");
+  p.className="pop";
+  p.innerText=text;
+  p.style.left=x+"px";
+  p.style.top=y+"px";
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),800);
+}
 
 hatBtn.onclick=()=>{
   hats++;
+  clickSound.currentTime=0;
+  clickSound.play();
 
-  for(let i=0;i<6;i++){
+  let rect=hatBtn.getBoundingClientRect();
+  spawnPop(rect.left+150, rect.top+100, "+1");
+
+  for(let i=0;i<5;i++){
     let s=document.createElement("div");
     s.className="spark";
-
-    let rect=hatBtn.getBoundingClientRect();
     s.style.left=(rect.left + Math.random()*200)+"px";
     s.style.top=(rect.top + Math.random()*150)+"px";
-
     document.body.appendChild(s);
     setTimeout(()=>s.remove(),600);
   }
@@ -208,10 +228,14 @@ hatBtn.onclick=()=>{
 };
 
 setInterval(()=>{
-  hats += worker * 0.05;
-  hats += factory * 0.1;
+  let gain = worker*0.05 + factory*0.1;
+  if(gain>0){
+    hats += gain;
+    let rect=hatBtn.getBoundingClientRect();
+    spawnPop(rect.left+150, rect.top+120, "+"+Math.floor(gain));
+  }
   update();
-},100);
+},500);
 
 function sellAll(){
   money += Math.floor(hats * price);
@@ -219,28 +243,17 @@ function sellAll(){
   update();
 }
 
-function upgrade(){
-  let cost = price*50;
-  if(money>=cost){money-=cost;price++;}
-}
-function hire(){
-  let cost = 100*(worker+1);
-  if(money>=cost){money-=cost;worker++;}
-}
-function train(){
-  let cost = 500*(worker+1);
-  if(money>=cost){money-=cost;}
-}
-function build(){
-  let cost = 2000*(factory+1);
-  if(money>=cost){money-=cost;factory++;}
-}
+function upgrade(){ let cost=price*50; if(money>=cost){money-=cost;price++;} }
+function hire(){ let cost=100*(worker+1); if(money>=cost){money-=cost;worker++;} }
+function train(){ let cost=500*(worker+1); if(money>=cost){money-=cost;workerLv++;} }
+function build(){ let cost=2000*(factory+1); if(money>=cost){money-=cost;factory++;} }
 
 function update(){
   moneyEl.innerText="所持金："+Math.floor(money)+"円";
   hatEl.innerText=Math.floor(hats);
   priceEl.innerText=price;
   workerEl.innerText=worker;
+  workerLvEl.innerText=workerLv;
   factoryEl.innerText=factory;
 
   priceCost.innerText=Math.floor(price*50)+"円";
@@ -253,12 +266,15 @@ const moneyEl=document.getElementById("money");
 const hatEl=document.getElementById("hat");
 const priceEl=document.getElementById("price");
 const workerEl=document.getElementById("worker");
+const workerLvEl=document.getElementById("workerLv");
 const factoryEl=document.getElementById("factory");
 
 const priceCost=document.getElementById("priceCost");
 const workerCost=document.getElementById("workerCost");
 const trainCost=document.getElementById("trainCost");
 const factoryCost=document.getElementById("factoryCost");
+
+const clickSound=document.getElementById("clickSound");
 
 update();
 </script>
