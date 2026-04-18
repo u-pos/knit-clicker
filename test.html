@@ -5,19 +5,24 @@
 <title>ニット帽クリッカー</title>
 
 <style>
+@font-face {
+  font-family: gamefont;
+  src: url(font.ttf);
+}
+
 body{
   margin:0;
   overflow:hidden;
-  font-family:sans-serif;
+  font-family:gamefont;
 }
 
+/* 背景 */
 #game{
   position:relative;
   width:100vw;
   height:100vh;
 }
 
-/* 背景 */
 .bg{
   position:absolute;
   width:100%;
@@ -25,76 +30,63 @@ body{
   object-fit:cover;
 }
 
-/* =========================
-   左上UI（完全固定）
-========================= */
-.ui{
+/* =====================
+ 左UIパネル（画像）
+===================== */
+.panel{
   position:absolute;
   top:20px;
   left:20px;
-  color:#fff;
-  font-weight:bold;
+  width:320px;
   z-index:10;
 }
 
-.money{
-  font-size:26px;
-  margin-bottom:15px;
+.panel img{
+  width:100%;
+}
+
+.panel-text{
+  position:absolute;
+  top:20px;
+  left:20px;
+  color:#ffd700;
+  text-shadow:2px 2px 4px #000;
 }
 
 .row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin-bottom:10px;
+  margin-top:15px;
 }
 
-/* 小アイコン */
-.icon{
-  width:26px;
-}
-
-/* =========================
-   ニット帽（ラフ準拠位置）
-========================= */
+/* =====================
+ ニット帽（確定位置）
+===================== */
 .hat{
   position:absolute;
-
-  /* ←ここが今回の一番重要 */
-  top:160px;
-  left:180px;
-
-  width:380px; /* ラフ通り大きめ */
-
-  cursor:pointer;
-  transition:transform 0.1s;
+  top:50%;
+  left:50%;
+  transform:translate(-10%, -20%);
+  width:420px;
+  z-index:5;
 }
 
 .hat:active{
-  transform:scale(0.9);
+  transform:translate(-10%, -20%) scale(0.9);
 }
 
-/* =========================
-   右上ボタン
-========================= */
+/* =====================
+ 右上納品ボタン
+===================== */
 .deliver{
   position:absolute;
   top:20px;
   right:20px;
-
-  padding:14px 26px;
-  background:#2ecc71;
-  border:none;
-  color:#fff;
-  font-size:18px;
-  border-radius:10px;
+  width:260px;
   cursor:pointer;
-  z-index:10;
 }
 
-/* =========================
-   下ボタン（完全均等）
-========================= */
+/* =====================
+ 下ボタン（画像UI）
+===================== */
 .bottom{
   position:absolute;
   bottom:0;
@@ -102,30 +94,17 @@ body{
   display:flex;
 }
 
-.btn{
-  flex:1;
-  padding:22px;
-  font-size:18px;
-  border:none;
-  color:#fff;
+.bottom img{
+  width:25%;
   cursor:pointer;
 }
-
-.up{background:#8e44ad;}
-.worker{background:#2980b9;}
-.training{background:#e67e22;}
-.factory{background:#c0392b;}
 
 /* 保存 */
 .save{
   position:absolute;
   right:20px;
-  bottom:100px;
-  padding:12px 20px;
-  background:#555;
-  color:#fff;
-  border:none;
-  border-radius:8px;
+  bottom:90px;
+  width:220px;
 }
 </style>
 </head>
@@ -135,131 +114,94 @@ body{
 <div id="game">
   <img src="bg.jpg" class="bg">
 
-  <!-- 左UI -->
-  <div class="ui">
-    <div class="money" id="money">所持金: 0円</div>
+  <!-- 左パネル -->
+  <div class="panel">
+    <img src="panel_left.png">
+    <div class="panel-text">
+      <div id="money">4,579円</div>
 
-    <div class="row">
-      <img src="knit-hat-v2.png" class="icon">
-      ニット帽: <span id="hatCount">0</span>
-    </div>
-
-    <div class="row">
-      💰 商品単価: <span id="price">10</span>円
-    </div>
-
-    <div class="row">
-      <img src="worker.png" class="icon">
-      パート: <span id="worker">0</span>人 / LV.<span id="workerLv">1</span>
-    </div>
-
-    <div class="row">
-      🏭 工場数: <span id="factory">0</span>
+      <div class="row">ニット帽：<span id="hat">50</span></div>
+      <div class="row">商品単価：<span id="price">63</span>円</div>
+      <div class="row">パート：<span id="worker">7</span>人</div>
+      <div class="row">工場数：<span id="factory">1</span></div>
     </div>
   </div>
 
-  <!-- 右上 -->
-  <button class="deliver" onclick="sellAll()">すべて納品</button>
-
   <!-- ニット -->
-  <img src="knit-hat-v2.png" class="hat" id="hat">
+  <img src="knit-hat-v2.png" class="hat" id="hatBtn">
+
+  <!-- 納品 -->
+  <img src="btn_deliver.png" class="deliver" onclick="sellAll()">
 
   <!-- 下 -->
   <div class="bottom">
-    <button class="btn up" onclick="upgradePrice()">商品単価UP</button>
-    <button class="btn worker" onclick="hire()">パートを雇う</button>
-    <button class="btn training" onclick="train()">強化合宿</button>
-    <button class="btn factory" onclick="build()">工場増設</button>
+    <img src="btn_upgrade.png" onclick="upgrade()">
+    <img src="btn_worker.png" onclick="hire()">
+    <img src="btn_training.png" onclick="train()">
+    <img src="btn_factory.png" onclick="build()">
   </div>
 
-  <button class="save" onclick="save()">保存して終了</button>
+  <img src="btn_save.png" class="save" onclick="save()">
 </div>
 
 <script>
-let money=0,hats=0,price=10,workers=0,workerLv=1,factories=0;
+let money=4579,hats=50,price=63,worker=7,factory=1;
 
-document.getElementById("hat").onclick=()=>{
+document.getElementById("hatBtn").onclick=()=>{
   hats++;
   update();
 };
 
-/* 自動 */
-setInterval(()=>{
-  hats += workers * workerLv * 0.05;
-  hats += factories * 0.1;
-  update();
-},100);
-
-/* 納品 */
 function sellAll(){
-  money += Math.floor(hats * price);
+  money += hats * price;
   hats=0;
   update();
 }
 
-/* 強化（かなり渋めに調整） */
-function upgradePrice(){
-  let cost=price*80;
-  if(money>=cost){
-    money-=cost;
+function upgrade(){
+  if(money>500){
+    money-=500;
     price+=1;
   }
 }
 
 function hire(){
-  let cost=200*(workers+1);
-  if(money>=cost){
-    money-=cost;
-    workers++;
+  if(money>3000){
+    money-=3000;
+    worker++;
   }
 }
 
 function train(){
-  let cost=1000*workerLv;
-  if(money>=cost){
-    money-=cost;
-    workerLv++;
+  if(money>10000){
+    money-=10000;
   }
 }
 
 function build(){
-  let cost=5000*(factories+1);
-  if(money>=cost){
-    money-=cost;
-    factories++;
+  if(money>50000){
+    money-=50000;
+    factory++;
   }
 }
 
-/* 表示 */
 function update(){
-  moneyEl.innerText="所持金: "+Math.floor(money)+"円";
-  hatCount.innerText=Math.floor(hats);
+  moneyEl.innerText=money+"円";
+  hatEl.innerText=hats;
   priceEl.innerText=price;
-  worker.innerText=workers;
-  workerLvEl.innerText=workerLv;
-  factory.innerText=factories;
+  workerEl.innerText=worker;
+  factoryEl.innerText=factory;
 }
 
 function save(){
-  localStorage.setItem("save",JSON.stringify({money,hats,price,workers,workerLv,factories}));
+  localStorage.setItem("save",JSON.stringify({money,hats,price,worker,factory}));
 }
 
-window.onload=()=>{
-  let s=localStorage.getItem("save");
-  if(s){
-    let d=JSON.parse(s);
-    money=d.money;hats=d.hats;price=d.price;
-    workers=d.workers;workerLv=d.workerLv;factories=d.factories;
-  }
-  update();
-};
-
 const moneyEl=document.getElementById("money");
-const hatCount=document.getElementById("hatCount");
+const hatEl=document.getElementById("hat");
 const priceEl=document.getElementById("price");
-const worker=document.getElementById("worker");
-const workerLvEl=document.getElementById("workerLv");
-const factory=document.getElementById("factory");
+const workerEl=document.getElementById("worker");
+const factoryEl=document.getElementById("factory");
 </script>
 
 </body>
