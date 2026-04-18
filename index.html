@@ -17,7 +17,6 @@ body{
   font-family:'DotGothic16', sans-serif;
 }
 
-/* ===== 画面固定 ===== */
 #game{
   width:1280px;
   height:720px;
@@ -32,25 +31,25 @@ body{
   position:absolute;
 }
 
-/* ===== 左パネル（サイズ強制） ===== */
+/* ===== 左パネル修正 ===== */
 .panel{
   position:absolute;
   top:20px;
-  left:20px;
-  width:260px; /* ←強制 */
+  left:30px;
+  width:300px; /* ←広げた */
 }
 
 .panel img{
-  width:260px; /* ←画像サイズ無視して固定 */
+  width:300px;
 }
 
 .panel-text{
   position:absolute;
-  top:45px;
-  left:25px;
-  color:#ffd700;
+  top:50px;
+  left:30px;
   font-size:20px;
   line-height:2.2;
+  color:#ffd700;
   text-shadow:2px 2px 0 #000;
 }
 
@@ -59,36 +58,42 @@ body{
   position:absolute;
   top:260px;
   left:540px;
-  width:340px;
+  width:360px;
   cursor:pointer;
+  transition:transform 0.1s;
 }
 .hat:active{
   transform:scale(0.9);
 }
 
-/* ===== 納品ボタン（ここが今回の本命） ===== */
+/* ===== キラキラ ===== */
+.spark{
+  position:absolute;
+  pointer-events:none;
+  width:40px;
+  height:40px;
+  background:radial-gradient(circle, #fff 0%, #ffd700 40%, transparent 70%);
+  border-radius:50%;
+  animation: sparkle 0.6s ease-out forwards;
+}
+
+@keyframes sparkle{
+  0%{ transform:scale(0.5); opacity:1;}
+  100%{ transform:scale(1.5); opacity:0;}
+}
+
+/* ===== 納品（画像のみ） ===== */
 .deliver{
   position:absolute;
   top:20px;
   right:40px;
-  width:260px;  /* ←強制縮小 */
+  width:260px;
 }
-
 .deliver img{
-  width:260px; /* ←画像サイズ無視 */
+  width:260px;
 }
 
-.deliver-text{
-  position:absolute;
-  top:42px;
-  left:50%;
-  transform:translateX(-50%);
-  color:#fff;
-  font-size:24px;
-  text-shadow:2px 2px 0 #000;
-}
-
-/* ===== 下ボタン ===== */
+/* ===== 下ボタン（btn_*2使用） ===== */
 .bottom{
   position:absolute;
   bottom:0;
@@ -110,21 +115,10 @@ body{
   width:280px;
 }
 
-/* ラベル */
-.label{
-  position:absolute;
-  top:55px;
-  left:50%;
-  transform:translateX(-50%);
-  color:#ffd700;
-  font-size:24px;
-  text-shadow:2px 2px 0 #000;
-}
-
-/* 価格 */
+/* 金額表示 */
 .price{
   position:absolute;
-  bottom:25px;
+  bottom:-10px;
   left:50%;
   transform:translateX(-50%);
   color:#fff;
@@ -138,57 +132,52 @@ body{
 
 <div id="game">
 
-  <img src="bg.jpg" class="bg">
+<img src="bg.jpg" class="bg">
 
-  <!-- 左 -->
-  <div class="panel">
-    <img src="panel_left.png">
-    <div class="panel-text">
-      <div id="money">所持金：0円</div>
-      <div>ニット帽：<span id="hat">0</span></div>
-      <div>商品単価：<span id="price">10</span>円</div>
-      <div>パート：<span id="worker">0</span></div>
-      <div>工場数：<span id="factory">0</span></div>
-    </div>
+<!-- 左 -->
+<div class="panel">
+  <img src="panel_left.png">
+  <div class="panel-text">
+    <div id="money">所持金：0円</div>
+    <div>ニット帽：<span id="hat">0</span></div>
+    <div>商品単価：<span id="price">10</span>円</div>
+    <div>パート：<span id="worker">0</span></div>
+    <div>工場数：<span id="factory">0</span></div>
+  </div>
+</div>
+
+<!-- ニット -->
+<img src="knit-hat-v2.png" class="hat" id="hatBtn">
+
+<!-- 納品 -->
+<div class="deliver" onclick="sellAll()">
+  <img src="btn_deliver2.png">
+</div>
+
+<!-- 下 -->
+<div class="bottom">
+
+  <div class="btn" onclick="upgrade()">
+    <img src="btn_upgrade2.png">
+    <div class="price" id="priceCost"></div>
   </div>
 
-  <!-- ニット -->
-  <img src="knit-hat-v2.png" class="hat" id="hatBtn">
-
-  <!-- 納品 -->
-  <div class="deliver" onclick="sellAll()">
-    <img src="btn_deliver.png">
-    <div class="deliver-text">すべて納品</div>
+  <div class="btn" onclick="hire()">
+    <img src="btn_worker2.png">
+    <div class="price" id="workerCost"></div>
   </div>
 
-  <!-- 下 -->
-  <div class="bottom">
-
-    <div class="btn" onclick="upgrade()">
-      <img src="btn_upgrade.png">
-      <div class="label">商品単価UP</div>
-      <div class="price" id="priceCost"></div>
-    </div>
-
-    <div class="btn" onclick="hire()">
-      <img src="btn_worker.png">
-      <div class="label">パート</div>
-      <div class="price" id="workerCost"></div>
-    </div>
-
-    <div class="btn" onclick="train()">
-      <img src="btn_training.png">
-      <div class="label">強化</div>
-      <div class="price" id="trainCost"></div>
-    </div>
-
-    <div class="btn" onclick="build()">
-      <img src="btn_factory.png">
-      <div class="label">工場</div>
-      <div class="price" id="factoryCost"></div>
-    </div>
-
+  <div class="btn" onclick="train()">
+    <img src="btn_training2.png">
+    <div class="price" id="trainCost"></div>
   </div>
+
+  <div class="btn" onclick="build()">
+    <img src="btn_factory2.png">
+    <div class="price" id="factoryCost"></div>
+  </div>
+
+</div>
 
 </div>
 
@@ -199,23 +188,43 @@ let price=10;
 let worker=0;
 let factory=0;
 
-hatBtn.onclick=()=>{
+/* ===== ニットクリック（エフェクト追加） ===== */
+hatBtn.onclick=(e)=>{
   hats++;
+
+  // キラキラ生成
+  for(let i=0;i<6;i++){
+    let s=document.createElement("div");
+    s.className="spark";
+
+    let rect=hatBtn.getBoundingClientRect();
+
+    s.style.left=(rect.left + Math.random()*200)+"px";
+    s.style.top=(rect.top + Math.random()*150)+"px";
+
+    document.body.appendChild(s);
+
+    setTimeout(()=>s.remove(),600);
+  }
+
   update();
 };
 
+/* 自動 */
 setInterval(()=>{
   hats += worker * 0.05;
   hats += factory * 0.1;
   update();
 },100);
 
+/* 納品 */
 function sellAll(){
   money += Math.floor(hats * price);
   hats=0;
   update();
 }
 
+/* 強化 */
 function upgrade(){
   let cost = price * 50;
   if(money>=cost){
@@ -247,13 +256,13 @@ function build(){
   }
 }
 
-/* ===== 小数点完全排除 ===== */
+/* 表示更新（小数排除） */
 function update(){
   moneyEl.innerText="所持金："+Math.floor(money)+"円";
   hatEl.innerText=Math.floor(hats);
-  priceEl.innerText=Math.floor(price);
-  workerEl.innerText=Math.floor(worker);
-  factoryEl.innerText=Math.floor(factory);
+  priceEl.innerText=price;
+  workerEl.innerText=worker;
+  factoryEl.innerText=factory;
 
   priceCost.innerText=Math.floor(price*50)+"円";
   workerCost.innerText=Math.floor(100*(worker+1))+"円";
