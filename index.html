@@ -145,12 +145,11 @@ body{
 
 <img src="bg.jpg" class="bg">
 
-<!-- 左 -->
 <div class="panel">
   <div class="panel-text">
     <div id="money">所持金：0円</div>
     <div>ニット帽：<span id="hat">0</span>個</div>
-    <div>商品単価：<span id="price">10</span>円</div>
+    <div>商品単価：<span id="price">100</span>円</div>
     <div>パート：<span id="worker">0</span>人（LV<span id="workerLv">1</span>）</div>
     <div>工場数：<span id="factory">0</span>棟</div>
   </div>
@@ -163,27 +162,10 @@ body{
 </div>
 
 <div class="bottom">
-
-  <div class="btn" onclick="upgrade()">
-    <img src="btn_upgrade2.png">
-    <div class="price" id="priceCost"></div>
-  </div>
-
-  <div class="btn" onclick="hire()">
-    <img src="btn_worker2.png">
-    <div class="price" id="workerCost"></div>
-  </div>
-
-  <div class="btn" onclick="train()">
-    <img src="btn_training2.png">
-    <div class="price" id="trainCost"></div>
-  </div>
-
-  <div class="btn" onclick="build()">
-    <img src="btn_factory2.png">
-    <div class="price" id="factoryCost"></div>
-  </div>
-
+  <div class="btn" onclick="upgrade()"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
+  <div class="btn" onclick="hire()"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
+  <div class="btn" onclick="train()"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
+  <div class="btn" onclick="build()"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
 </div>
 
 </div>
@@ -191,12 +173,16 @@ body{
 <audio id="clickSound" src="click.mp3"></audio>
 
 <script>
-let money=0,hats=0,price=10,worker=0,factory=0,workerLv=1;
+let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1;
 let autoBuffer=0;
 
-/* ===== 共通エフェクト ===== */
-function hatEffect(x,y,value){
+/* ===== 生産式 ===== */
+function getGain(){
+  return (worker * 0.2 * workerLv) + (factory * 1.5);
+}
 
+/* ===== エフェクト ===== */
+function hatEffect(x,y,value){
   spawnPop(x,y,"+"+value);
 
   for(let i=0;i<5;i++){
@@ -237,14 +223,14 @@ hatBtn.onclick=()=>{
 
 /* ===== 自動 ===== */
 setInterval(()=>{
-  let gain = worker*0.05 + factory*0.1;
+  let gain = getGain();
 
   hats += gain;
   autoBuffer += gain;
 
   let trigger = Math.floor(autoBuffer);
 
-  if(trigger>=1){
+  if(trigger >= 1){
     autoBuffer -= trigger;
 
     let rect=hatBtn.getBoundingClientRect();
@@ -261,10 +247,37 @@ function sellAll(){
   update();
 }
 
-function upgrade(){ let cost=price*50; if(money>=cost){money-=cost;price++;} }
-function hire(){ let cost=100*(worker+1); if(money>=cost){money-=cost;worker++;} }
-function train(){ let cost=500*(worker+1); if(money>=cost){money-=cost;workerLv++;} }
-function build(){ let cost=2000*(factory+1); if(money>=cost){money-=cost;factory++;} }
+function upgrade(){
+  let cost = price * 20;
+  if(money >= cost){
+    money -= cost;
+    price += 20;
+  }
+}
+
+function hire(){
+  let cost = Math.floor(200 * Math.pow(1.4, worker));
+  if(money >= cost){
+    money -= cost;
+    worker++;
+  }
+}
+
+function train(){
+  let cost = Math.floor(2000 * Math.pow(2, workerLv - 1));
+  if(money >= cost){
+    money -= cost;
+    workerLv++;
+  }
+}
+
+function build(){
+  let cost = Math.floor(5000 * Math.pow(1.8, factory));
+  if(money >= cost){
+    money -= cost;
+    factory++;
+  }
+}
 
 /* ===== 更新 ===== */
 function update(){
@@ -275,10 +288,10 @@ function update(){
   workerLvEl.innerText=workerLv;
   factoryEl.innerText=factory;
 
-  priceCost.innerText=Math.floor(price*50)+"円";
-  workerCost.innerText=Math.floor(100*(worker+1))+"円";
-  trainCost.innerText=Math.floor(500*(worker+1))+"円";
-  factoryCost.innerText=Math.floor(2000*(factory+1))+"円";
+  priceCost.innerText=Math.floor(price*20)+"円";
+  workerCost.innerText=Math.floor(200*Math.pow(1.4,worker))+"円";
+  trainCost.innerText=Math.floor(2000*Math.pow(2,workerLv-1))+"円";
+  factoryCost.innerText=Math.floor(5000*Math.pow(1.8,factory))+"円";
 }
 
 const moneyEl=document.getElementById("money");
