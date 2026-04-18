@@ -111,10 +111,9 @@ body{
   width:100%;
 }
 
-/* ←ここ微調整 */
 .price{
   position:absolute;
-  bottom:10px; /* 少し下げた */
+  bottom:10px;
   left:50%;
   transform:translateX(-50%);
   color:#fff;
@@ -176,17 +175,19 @@ body{
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1;
 let autoBuffer=0;
 
+/* 表示 */
 function formatMoney(num){
   if(num>=1e8) return (num/1e8).toFixed(2)+"億円";
   if(num>=1e4) return (num/1e4).toFixed(2)+"万円";
   return Math.floor(num)+"円";
 }
 
+/* 生産（調整済み） */
 function getGain(){
-  return (worker*0.2*workerLv)+(factory*1.5);
+  return (worker * 0.1 * workerLv) + (factory * 0.5);
 }
 
-/* ポップ生成 */
+/* ポップ */
 function spawnPop(x,y,text){
   let p=document.createElement("div");
   p.className="pop";
@@ -225,39 +226,56 @@ setInterval(()=>{
     let rect=hatBtn.getBoundingClientRect();
     hatEffect(rect.left+150, rect.top+120, trigger);
   }
+
   update();
 },500);
 
+/* 納品 */
 function sellAll(){
   money+=Math.floor(hats*price);
   hats=0;
   update();
 }
 
+/* 強化（バランス調整済み） */
 function upgrade(){
-  let cost=Math.floor(500*Math.pow(1.5,(price-100)/20));
-  if(money>=cost){money-=cost;price+=20;}
+  let cost=Math.floor(price*40);
+  if(money>=cost){
+    money-=cost;
+    price+=10;
+  }
 }
 
 function hire(){
-  let cost=Math.floor(200*Math.pow(1.4,worker));
-  if(money>=cost){money-=cost;worker++;}
+  let cost=Math.floor(300*Math.pow(1.6,worker));
+  if(money>=cost){
+    money-=cost;
+    worker++;
+  }
 }
 
 function train(){
-  let cost=Math.floor(2000*Math.pow(2,workerLv-1));
-  if(money>=cost){money-=cost;workerLv++;}
+  let cost=Math.floor(3000*Math.pow(2.2,workerLv-1));
+  if(money>=cost){
+    money-=cost;
+    workerLv++;
+  }
 }
 
 function build(){
-  let cost=Math.floor(5000*Math.pow(1.8,factory));
-  if(money>=cost){money-=cost;factory++;}
+  let cost=Math.floor(8000*Math.pow(2,factory));
+  if(money>=cost){
+    money-=cost;
+    factory++;
+  }
 }
 
+/* 保存 */
 function saveGame(){
   localStorage.setItem("save",JSON.stringify({money,hats,price,worker,factory,workerLv}));
 }
 
+/* 読込 */
 (function(){
   let s=localStorage.getItem("save");
   if(s){
@@ -271,6 +289,7 @@ function saveGame(){
   }
 })();
 
+/* 更新 */
 function update(){
   moneyEl.innerText="所持金："+formatMoney(money);
   hatEl.innerText=Math.floor(hats);
@@ -279,10 +298,10 @@ function update(){
   workerLvEl.innerText=workerLv;
   factoryEl.innerText=factory;
 
-  priceCost.innerText=formatMoney(500*Math.pow(1.5,(price-100)/20));
-  workerCost.innerText=formatMoney(200*Math.pow(1.4,worker));
-  trainCost.innerText=formatMoney(2000*Math.pow(2,workerLv-1));
-  factoryCost.innerText=formatMoney(5000*Math.pow(1.8,factory));
+  priceCost.innerText=formatMoney(price*40);
+  workerCost.innerText=formatMoney(300*Math.pow(1.6,worker));
+  trainCost.innerText=formatMoney(3000*Math.pow(2.2,workerLv-1));
+  factoryCost.innerText=formatMoney(8000*Math.pow(2,factory));
 }
 
 const moneyEl=document.getElementById("money");
