@@ -2,58 +2,74 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<!-- ズーム完全禁止 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+
 <title>ニット帽クリッカー</title>
 
 <style>
 body{
   margin:0;
   background:#000;
+  overflow:hidden;
   font-family:sans-serif;
   touch-action: manipulation;
-  overflow:hidden;
 }
 
-/* ズーム防止 */
-*{
-  touch-action: manipulation;
-}
-
-/* ===== スマホUI ===== */
-#mobile-ui{
-  width:100vw;
+/* ===== 共通 ===== */
+#game{
+  width:100%;
   height:100vh;
-  display:flex;
-  flex-direction:column;
-  color:#fff;
+  position:relative;
 }
 
-/* 上 */
-.top{
-  padding:10px;
-  font-size:18px;
-  line-height:1.6;
+/* 背景 */
+.bg{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-/* 中央 */
-.center{
-  flex:1;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
+/* 帽子 */
 .hat{
-  width:200px;
+  position:absolute;
+  width:280px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
   transition:0.1s;
 }
 
-/* 下 */
+/* 上ステータス */
+.panel{
+  position:absolute;
+  top:10px;
+  left:10px;
+  color:#fff;
+  font-size:18px;
+  background:rgba(0,0,0,0.6);
+  padding:10px;
+}
+
+/* 納品 */
+.deliver{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:200px;
+}
+
+/* ボタン */
 .bottom{
+  position:absolute;
+  bottom:0;
+  width:100%;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
-  padding:10px;
+  gap:5px;
+  padding:5px;
 }
 
 .btn img{
@@ -64,20 +80,38 @@ body{
 .pop{
   position:absolute;
   color:#fff;
-  font-size:20px;
   animation:pop 0.8s forwards;
 }
 @keyframes pop{
-  100%{opacity:0;transform:translateY(-50px);}
+  100%{opacity:0;transform:translateY(-60px);}
+}
+
+/* ===== PC時（横UI） ===== */
+@media(min-width:769px){
+  #game{
+    width:1280px;
+    height:720px;
+    margin:auto;
+  }
+
+  .bottom{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .deliver{
+    width:260px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div id="mobile-ui">
+<div id="game">
 
-<div class="top">
+<img src="bg.jpg" class="bg">
+
+<div class="panel">
   <div id="money"></div>
   <div>ニット帽：<span id="hatCount"></span></div>
   <div>商品単価：<span id="price"></span>円</div>
@@ -86,15 +120,17 @@ body{
   <div>転生：<span id="soul"></span>回</div>
 </div>
 
-<div class="center">
-  <img src="knit-hat-v2.png" class="hat" id="hatBtn">
+<img src="knit-hat-v2.png" class="hat" id="hatBtn">
+
+<div class="deliver" onclick="sellAll()">
+  <img src="btn_deliver2.png">
 </div>
 
 <div class="bottom">
-  <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"></div>
-  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"></div>
-  <div class="btn" onclick="train(this)"><img src="btn_training2.png"></div>
-  <div class="btn" onclick="build(this)"><img src="btn_factory2.png"></div>
+  <div class="btn" onclick="hire()"><img src="btn_worker2.png"></div>
+  <div class="btn" onclick="upgrade()"><img src="btn_upgrade2.png"></div>
+  <div class="btn" onclick="train()"><img src="btn_training2.png"></div>
+  <div class="btn" onclick="build()"><img src="btn_factory2.png"></div>
 </div>
 
 </div>
@@ -102,16 +138,26 @@ body{
 <script>
 
 /* ===== 音 ===== */
+const bgm = new Audio("bgm.mp3");
+bgm.loop=true;
+bgm.volume=0.3;
+
 function play(src){
   new Audio(src).play();
 }
 
+/* 初回操作でBGM開始 */
+let bgmStarted=false;
+document.addEventListener("click",()=>{
+  if(!bgmStarted){
+    bgm.play().catch(()=>{});
+    bgmStarted=true;
+  }
+},{once:true});
+
 /* ===== 状態 ===== */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
 let autoBuffer=0,paused=false;
-
-/* ===== DOM ===== */
-const hatBtn=document.getElementById("hatBtn");
 
 /* ===== 表示 ===== */
 function formatMoney(n){
@@ -131,6 +177,8 @@ function update(){
 }
 
 /* ===== エフェクト ===== */
+const hatBtn=document.getElementById("hatBtn");
+
 function pop(val){
  const r=hatBtn.getBoundingClientRect();
  const p=document.createElement("div");
@@ -143,8 +191,8 @@ function pop(val){
 }
 
 function hatEffect(val){
- hatBtn.style.transform="scale(0.9)";
- setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+ hatBtn.style.transform="translate(-50%,-50%) scale(0.9)";
+ setTimeout(()=>hatBtn.style.transform="translate(-50%,-50%) scale(1)",80);
  pop(val);
 }
 
@@ -183,28 +231,28 @@ function sellAll(){
 }
 
 /* ===== 強化 ===== */
-function upgrade(el){
+function upgrade(){
  if(money>=500){
   money-=500;
   price+=10;
   play("up.mp3");
  }
 }
-function hire(el){
+function hire(){
  if(money>=100){
   money-=100;
   worker++;
   play("up.mp3");
  }
 }
-function train(el){
+function train(){
  if(money>=2000){
   money-=2000;
   workerLv++;
   play("up.mp3");
  }
 }
-function build(el){
+function build(){
  if(money>=5000){
   money-=5000;
   factory++;
