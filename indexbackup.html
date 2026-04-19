@@ -23,7 +23,7 @@ html,body{
  width:100%;
 }
 
-/* iOS高さバグ対策 */
+/* ===== 高さバグ対策 ===== */
 #game{
  position:relative;
  width:100%;
@@ -64,7 +64,6 @@ html,body{
  padding:6px;
  text-align:center;
 }
-
 .ctrl:active{
  background:#a00;
 }
@@ -79,17 +78,17 @@ html,body{
  width:130px;
 }
 
-/* ニット（スマホ用に少し縮小） */
+/* ニット */
 .hat{
  position:absolute;
  left:50%;
- top:50%;
+ top:45%;   /* ← 少し上げる */
  transform:translate(-50%,-50%);
- width:200px;
+ width:190px; /* ← 少し小さく */
  transition:0.1s;
 }
 
-/* 下ボタン */
+/* ===== 下ボタン（完全修正） ===== */
 .bottom{
  position:absolute;
  bottom:0;
@@ -97,41 +96,38 @@ html,body{
  display:grid;
  grid-template-columns:1fr 1fr;
  gap:6px;
- padding:10px;
+ padding:4px 6px; /* ← 圧縮 */
 }
 
-/* ボタン全体 */
 .btn{
  display:flex;
  flex-direction:column;
  align-items:center;
- justify-content:flex-start;   /* ← 余白削除 */
+ justify-content:flex-start;
 }
 
-/* 画像 */
 .btn img{
  width:100%;
- margin:0;                    /* ← 無駄余白削除 */
+ display:block;
 }
 
-/* コスト（ここが本命） */
+/* コスト（完全密着） */
 .cost{
- font-size:16px;              /* ← 少し大きく */
- line-height:1;               /* ← 行間詰める */
- margin-top:-2px;             /* ← ほぼ密着 */
- margin-bottom:0;
+ font-size:16px;
+ line-height:1;
+ margin:0;
  padding:0;
+ transform:translateY(-8px); /* ← 強制密着 */
  color:#fff;
 }
 
-/* +1ポップ */
+/* ポップ */
 .pop{
  position:absolute;
  color:#fff;
  font-size:18px;
  animation:pop 0.8s forwards;
 }
-
 @keyframes pop{
  100%{opacity:0; transform:translateY(-60px);}
 }
@@ -215,7 +211,7 @@ html,body{
 
 <script>
 
-/* iOS高さ補正 */
+/* ===== 高さ補正 ===== */
 function setVH(){
  let vh = window.innerHeight * 0.01;
  document.documentElement.style.setProperty('--vh', vh + 'px');
@@ -224,9 +220,7 @@ setVH();
 window.addEventListener('resize', setVH);
 
 /* 音 */
-function play(src){
- new Audio(src).play();
-}
+function play(src){ new Audio(src).play(); }
 
 const bgm = new Audio("bgm.mp3");
 bgm.loop=true;
@@ -241,6 +235,9 @@ let upgradeCount=0;
 
 /* 表示 */
 function update(){
+ money = Math.floor(money);
+ hats = Math.floor(hats);
+
  document.getElementById("money").innerText="所持金："+money+"円";
  document.getElementById("hatCount").innerText=hats;
  document.getElementById("price").innerText=price;
@@ -258,27 +255,23 @@ function update(){
 /* エフェクト */
 const hatBtn=document.getElementById("hatBtn");
 
-function press(el){
- el.style.transform="scale(0.9)";
- setTimeout(()=>el.style.transform="scale(1)",80);
-}
-
 function hatEffect(){
  hatBtn.style.transform="translate(-50%,-50%) scale(0.9)";
  setTimeout(()=>hatBtn.style.transform="translate(-50%,-50%) scale(1)",80);
 }
 
-/* +1ポップ */
+function press(el){
+ el.style.transform="scale(0.9)";
+ setTimeout(()=>el.style.transform="scale(1)",80);
+}
+
 function pop(val){
- const r = hatBtn.getBoundingClientRect();
-
- const p = document.createElement("div");
- p.className = "pop";
- p.innerText = "+" + val;
-
- p.style.left = (r.left + r.width * 0.7) + "px";
- p.style.top  = (r.top  + r.height * 0.2) + "px";
-
+ const r=hatBtn.getBoundingClientRect();
+ const p=document.createElement("div");
+ p.className="pop";
+ p.innerText="+"+val;
+ p.style.left=(r.left+r.width*0.7)+"px";
+ p.style.top=(r.top+r.height*0.2)+"px";
  document.body.appendChild(p);
  setTimeout(()=>p.remove(),800);
 }
@@ -291,6 +284,22 @@ hatBtn.onclick=()=>{
  pop(1);
  update();
 };
+
+/* ===== 自動生産（追加） ===== */
+setInterval(()=>{
+ let production = worker * workerLv;
+
+ if(production > 0){
+   hats += production;
+
+   if(production >= 1){
+     pop(production);
+     hatEffect();
+   }
+
+   update();
+ }
+},1000);
 
 /* 納品 */
 function sellAll(){
@@ -351,12 +360,10 @@ function build(el){
 /* 転生 */
 function confirmPrestige(){
  play("click.mp3");
-
  if(money<100000000){
   alert("1億円以下では転生できません");
   return;
  }
-
  if(confirm("本当に転生しますか？")){
   soul++;
   money=0; hats=0; price=100; worker=0; factory=0; workerLv=1; upgradeCount=0;
