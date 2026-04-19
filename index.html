@@ -6,34 +6,111 @@
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 
 <style>
-body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:'DotGothic16';}
-#game{width:1280px;height:720px;position:relative;}
-.bg{position:absolute;width:100%;height:100%;}
+body{
+  margin:0;
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:'DotGothic16';
+}
 
-.panel{position:absolute;top:20px;left:20px;width:320px;padding:18px;background:rgba(0,0,0,0.85);border-radius:12px;}
-.panel-text{color:#ffd700;font-size:20px;line-height:2.2;}
+#game{
+  width:1280px;
+  height:720px;
+  position:relative;
+}
 
-.save{margin-top:10px;background:#222;color:#fff;padding:10px;text-align:center;cursor:pointer;}
+.bg{ position:absolute;width:100%;height:100%; }
 
-.hat{position:absolute;top:170px;left:540px;width:360px;cursor:pointer;transition:0.1s;}
+/* パネル */
+.panel{
+  position:absolute;
+  top:20px;
+  left:20px;
+  width:340px;
+  padding:18px;
+  background:rgba(0,0,0,0.85);
+  border-radius:12px;
+}
 
-.pop{position:absolute;color:#fff;font-size:28px;animation:pop 0.8s forwards;}
-@keyframes pop{100%{opacity:0;transform:translateY(-60px);}}
+.panel-text{
+  color:#ffd700;
+  font-size:20px;
+  line-height:2.2;
+}
 
-.deliver{position:absolute;top:20px;right:40px;width:260px;}
-.deliver img{width:100%;}
+/* ボタン配置 */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:10px;
+}
 
-.bottom{position:absolute;bottom:0;width:100%;height:200px;}
+.ctrl{
+  background:#222;
+  color:#fff;
+  padding:10px;
+  text-align:center;
+  cursor:pointer;
+}
 
-.btn{position:absolute;width:280px;height:200px;}
+/* ニット */
+.hat{
+  position:absolute;
+  top:170px;
+  left:540px;
+  width:360px;
+  cursor:pointer;
+  transition:0.1s;
+}
+
+/* ボタン */
+.bottom{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:200px;
+}
+
+.btn{
+  position:absolute;
+  width:280px;
+  height:200px;
+  cursor:pointer;
+}
+
 .btn:nth-child(1){left:40px;}
 .btn:nth-child(2){left:360px;}
 .btn:nth-child(3){left:680px;}
 .btn:nth-child(4){left:1000px;}
 
-.btn img{position:absolute;bottom:0;width:100%;}
+.btn img{
+  position:absolute;
+  bottom:0;
+  width:100%;
+}
 
-.price{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:#fff;}
+.price{
+  position:absolute;
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#fff;
+}
+
+/* ポップ */
+.pop{
+  position:absolute;
+  color:#fff;
+  font-size:28px;
+  animation:pop 0.8s forwards;
+}
+@keyframes pop{
+  100%{opacity:0;transform:translateY(-60px);}
+}
 </style>
 </head>
 
@@ -52,45 +129,44 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
     <div>転生：<span id="soul"></span></div>
   </div>
 
-  <div class="save" onclick="saveGame()">セーブして終了</div>
-  <div class="save" onclick="prestige()">転生</div>
+  <div class="grid">
+    <div class="ctrl" onclick="prestige()">転生する</div>
+    <div class="ctrl" onclick="saveAndPause()">保存して終了</div>
+    <div class="ctrl" onclick="resumeGame()">再開する</div>
+    <div class="ctrl" onclick="resetGame()">廃業する</div>
+  </div>
 </div>
 
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
-<div class="deliver" onclick="sellAll()">
-  <img src="btn_deliver2.png">
-</div>
-
 <div class="bottom">
-  <div class="btn" onclick="hire()"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
-  <div class="btn" onclick="upgrade()"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
-  <div class="btn" onclick="train()"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
-  <div class="btn" onclick="build()"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
+  <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
+  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
+  <div class="btn" onclick="train(this)"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
+  <div class="btn" onclick="build(this)"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
 </div>
 
 </div>
+
+<audio id="clickSound" src="click.mp3"></audio>
+<audio id="upSound" src="up.mp3"></audio>
 
 <script>
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
-let autoBuffer=0;
 let upgradeCount=0;
+let autoBuffer=0;
+let paused=false;
 
-/* 表示 */
+/* フォーマット */
 function format(n){
-  if(n>=1e8) return (n/1e8).toFixed(2)+"億円";
-  if(n>=1e4) return (n/1e4).toFixed(2)+"万円";
+  if(n>=1e8)return(n/1e8).toFixed(2)+"億円";
+  if(n>=1e4)return(n/1e4).toFixed(2)+"万円";
   return Math.floor(n)+"円";
-}
-
-/* 転生倍率 */
-function getMultiplier(){
-  return 1 + soul*0.05;
 }
 
 /* 生産 */
 function getGain(){
-  return ((worker*0.05*workerLv)+(factory*1.0))*getMultiplier();
+  return (worker*0.05*workerLv)+(factory*1.0);
 }
 
 /* エフェクト */
@@ -110,9 +186,19 @@ function spawnPop(x,y,text){
   setTimeout(()=>p.remove(),800);
 }
 
-/* 手動 */
+/* ボタンエフェクト */
+function pressEffect(el){
+  el.style.transform="scale(0.9)";
+  setTimeout(()=>el.style.transform="scale(1)",80);
+}
+
+/* クリック */
 hatBtn.onclick=()=>{
+  if(paused)return;
   hats++;
+  clickSound.currentTime=0;
+  clickSound.play();
+
   let r=hatBtn.getBoundingClientRect();
   hatEffect(r.left+150,r.top+100,1);
   update();
@@ -120,6 +206,8 @@ hatBtn.onclick=()=>{
 
 /* 自動 */
 setInterval(()=>{
+  if(paused)return;
+
   let g=getGain();
   hats+=g;
   autoBuffer+=g;
@@ -133,53 +221,77 @@ setInterval(()=>{
   update();
 },500);
 
-/* 納品 */
-function sellAll(){
-  money+=Math.floor(hats*price);
-  hats=0;
-  update();
-}
-
-/* ===== 修正ポイント ===== */
-function upgrade(){
+/* 強化系 */
+function upgrade(el){
   let cost=Math.floor(500*Math.pow(1.25,upgradeCount));
   if(money>=cost){
     money-=cost;
-    price+=10; // ←そのまま
+    price+=10;
     upgradeCount++;
+    upSound.currentTime=0;
+    upSound.play();
+    pressEffect(el);
   }
 }
 
-/* その他 */
-function hire(){
+function hire(el){
   let c=100*Math.pow(1.5,worker);
-  if(money>=c){money-=c;worker++;}
+  if(money>=c){
+    money-=c;
+    worker++;
+    upSound.play();
+    pressEffect(el);
+  }
 }
 
-function train(){
+function train(el){
   let c=2000*Math.pow(2.2,workerLv-1);
-  if(money>=c){money-=c;workerLv++;}
+  if(money>=c){
+    money-=c;
+    workerLv++;
+    upSound.play();
+    pressEffect(el);
+  }
 }
 
-function build(){
+function build(el){
   let c=5000*Math.pow(2,factory);
-  if(money>=c){money-=c;factory++;}
+  if(money>=c){
+    money-=c;
+    factory++;
+    upSound.play();
+    pressEffect(el);
+  }
+}
+
+/* 納品 */
+function sellAll(){
+  if(paused)return;
+  money+=Math.floor(hats*price);
+  hats=0;
+}
+
+/* 制御 */
+function saveAndPause(){
+  saveGame();
+  paused=true;
+}
+
+function resumeGame(){
+  paused=false;
+}
+
+function resetGame(){
+  localStorage.removeItem("save");
+  location.reload();
 }
 
 /* 転生 */
 function prestige(){
-  if(money<1e8){
-    alert("1億円以上必要");
-    return;
-  }
-  let gain=Math.floor(Math.sqrt(money/1e8));
-  soul+=gain;
-
-  money=0; hats=0; price=100;
-  worker=0; factory=0; workerLv=1;
-  upgradeCount=0;
-
-  update();
+  if(money<1e8){alert("1億円必要");return;}
+  let g=Math.floor(Math.sqrt(money/1e8));
+  soul+=g;
+  money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
 }
 
 /* 保存 */
@@ -233,6 +345,9 @@ const priceCost=document.getElementById("priceCost");
 const workerCost=document.getElementById("workerCost");
 const trainCost=document.getElementById("trainCost");
 const factoryCost=document.getElementById("factoryCost");
+
+const clickSound=document.getElementById("clickSound");
+const upSound=document.getElementById("upSound");
 
 update();
 </script>
