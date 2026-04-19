@@ -286,10 +286,32 @@ function prestige(){
  soul+=g;
  money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
 }
-function saveAndPause(){saveGame();paused=true;}
-function resumeGame(){paused=false;}
+function saveAndPause(){
+ saveGame();
+ paused=true;
+ bgm.pause(); // ←追加
+}
+function resumeGame(){
+ paused=false;
+ bgm.play().catch(()=>{}); // ←既存 or なければ追加
+}
 function resetGame(){
  localStorage.removeItem(SAVE_KEY);
+
+ // 状態も強制リセット（これが重要）
+ money=0;
+ hats=0;
+ price=100;
+ worker=0;
+ factory=0;
+ workerLv=1;
+ soul=0;
+ upgradeCount=0;
+ autoBuffer=0;
+
+ update(); // ←画面即反映
+
+ // 念のためリロード
  location.reload();
 }
 
