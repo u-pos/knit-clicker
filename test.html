@@ -210,7 +210,7 @@ function sellAll(el){
 /* ===== 強化（99制限） ===== */
 function upgrade(el){
  let cost=ceil10(500*Math.pow(1.25,upgradeCount));
- if(money>=cost && price<MAX){
+ if(money>=cost){
   money-=cost;price+=10;upgradeCount++;
   playUp();
   pressEffect(el);
