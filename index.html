@@ -37,11 +37,10 @@ body{
 
 .panel-text{
   color:#ffd700;
-  font-size:26px;     /* ← 24 → 26 */
-  line-height:2.0;    /* ← 2.2 → 2.0（少し詰める） */
+  font-size:26px;
+  line-height:2.0;
 }
 
-/* 操作ボタン */
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -110,7 +109,7 @@ body{
 
 .price{
   position:absolute;
-  bottom:5px;   /* ← 10 → 5（少し下げる） */
+  bottom:5px;
   left:50%;
   transform:translateX(-50%);
   color:#fff;
@@ -178,23 +177,35 @@ let upgradeCount=0;
 let autoBuffer=0;
 let paused=false;
 
-/* 音 */
+/* 音（重ね再生） */
 const clickSound=document.getElementById("clickSound");
 const upSound=document.getElementById("upSound");
 const moneySound=document.getElementById("moneySound");
 
-/* ボタン赤＋音 */
-function ctrlPress(el,fn){
-  clickSound.currentTime=0;
-  clickSound.play();
+function playClick(){
+  const s = clickSound.cloneNode();
+  s.play();
+}
 
+function playUp(){
+  const s = upSound.cloneNode();
+  s.play();
+}
+
+function playMoney(){
+  const s = moneySound.cloneNode();
+  s.play();
+}
+
+/* 赤＋音 */
+function ctrlPress(el,fn){
+  playClick();
   el.classList.add("active");
   setTimeout(()=>el.classList.remove("active"),150);
-
   fn();
 }
 
-/* フォーマット */
+/* 表示 */
 function format(n){
   if(n>=1e8)return(n/1e8).toFixed(2)+"億円";
   if(n>=1e4)return(n/1e4).toFixed(2)+"万円";
@@ -231,7 +242,8 @@ function pressEffect(el){
 hatBtn.onclick=()=>{
   if(paused)return;
   hats++;
-  clickSound.play();
+  playClick();
+
   let r=hatBtn.getBoundingClientRect();
   hatEffect(r.left+150,r.top+100,1);
   update();
@@ -261,8 +273,7 @@ function sellAll(el){
   if(hats>0){
     money+=Math.floor(hats*price);
     hats=0;
-
-    moneySound.play();
+    playMoney();
     pressEffect(el);
   }
   update();
@@ -275,7 +286,7 @@ function upgrade(el){
     money-=cost;
     price+=10;
     upgradeCount++;
-    upSound.play();
+    playUp();
     pressEffect(el);
   }
 }
@@ -285,7 +296,7 @@ function hire(el){
   if(money>=c){
     money-=c;
     worker++;
-    upSound.play();
+    playUp();
     pressEffect(el);
   }
 }
@@ -295,7 +306,7 @@ function train(el){
   if(money>=c){
     money-=c;
     workerLv++;
-    upSound.play();
+    playUp();
     pressEffect(el);
   }
 }
@@ -305,7 +316,7 @@ function build(el){
   if(money>=c){
     money-=c;
     factory++;
-    upSound.play();
+    playUp();
     pressEffect(el);
   }
 }
