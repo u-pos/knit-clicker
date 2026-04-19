@@ -33,6 +33,7 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
 </head>
 
 <body>
+
 <div id="game">
 <img src="bg.jpg" class="bg">
 
@@ -70,53 +71,69 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
 <div id="modalText"></div>
 <div id="modalButtons"></div>
 </div>
+
 </div>
 
 <script>
-const MAX=99;
 
-/* ===== 保存/読込 ===== */
-function saveGame(){
- const data={
-  money,hats,price,worker,factory,workerLv,soul,upgradeCount
- };
- localStorage.setItem("knitSave",JSON.stringify(data));
-}
-
-function loadGame(){
- const data=JSON.parse(localStorage.getItem("knitSave"));
- if(data){
-  money=data.money||0;
-  hats=data.hats||0;
-  price=data.price||100;
-  worker=data.worker||0;
-  factory=data.factory||0;
-  workerLv=data.workerLv||1;
-  soul=data.soul||0;
-  upgradeCount=data.upgradeCount||0;
- }
-}
-
-/* ===== 金額表示 ===== */
-function formatMoney(n){
- n=Math.floor(n);
- if(n>=1e16) return (Math.floor(n/1e14)/100)+"京円";
- if(n>=1e12) return (Math.floor(n/1e10)/100)+"兆円";
- if(n>=1e8) return (Math.floor(n/1e6)/100)+"億円";
- if(n>=1e4) return (Math.floor(n/100)/100)+"万円";
- return n+"円";
-}
-function formatCost(n){
- n=Math.floor(n);
- if(n>=1e8) return (Math.floor(n/1e6)/100)+"億円";
- if(n>=1e4) return (Math.floor(n/100)/100)+"万円";
- return n+"円";
-}
-function ceil10(n){return Math.ceil(n/10)*10;}
+const SAVE_KEY="knitSave";
 
 /* ===== 状態 ===== */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
 let upgradeCount=0,autoBuffer=0,paused=false;
+
+/* ===== 保存 ===== */
+function saveGame(){
+ const data={money,hats,price,worker,factory,workerLv,soul,upgradeCount};
+ localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+}
+
+/* ===== 読み込み（ここが重要） ===== */
+function loadGame(){
+ try{
+  const raw=localStorage.getItem(SAVE_KEY);
+  if(!raw) return;
+  const d=JSON.parse(raw);
+
+  money=d.money||0;
+  hats=d.hats||0;
+  price=d.price||100;
+  worker=d.worker||0;
+  factory=d.factory||0;
+  workerLv=d.workerLv||1;
+  soul=d.soul||0;
+  upgradeCount=d.upgradeCount||0;
+
+ }catch(e){
+  console.log("ロード失敗",e);
+ }
+}
+
+/* ★最初にロード */
+loadGame();
+
+/* ===== 離脱時保存（超重要） ===== */
+window.addEventListener("beforeunload",saveGame);
+
+/* ===== 自動保存 ===== */
+setInterval(saveGame,2000);
+
+/* ===== 金額 ===== */
+function formatMoney(n){
+ n=Math.floor(n);
+ if(n>=1e16)return(Math.floor(n/1e14)/100)+"京円";
+ if(n>=1e12)return(Math.floor(n/1e10)/100)+"兆円";
+ if(n>=1e8)return(Math.floor(n/1e6)/100)+"億円";
+ if(n>=1e4)return(Math.floor(n/100)/100)+"万円";
+ return n+"円";
+}
+function formatCost(n){
+ n=Math.floor(n);
+ if(n>=1e8)return(Math.floor(n/1e6)/100)+"億円";
+ if(n>=1e4)return(Math.floor(n/100)/100)+"万円";
+ return n+"円";
+}
+function ceil10(n){return Math.ceil(n/10)*10;}
 
 /* DOM */
 const hatBtn=document.getElementById("hatBtn");
@@ -127,14 +144,10 @@ const workerEl=document.getElementById("worker");
 const workerLvEl=document.getElementById("workerLv");
 const factoryEl=document.getElementById("factory");
 const soulEl=document.getElementById("soul");
-
 const priceCost=document.getElementById("priceCost");
 const workerCost=document.getElementById("workerCost");
 const trainCost=document.getElementById("trainCost");
 const factoryCost=document.getElementById("factoryCost");
-
-/* ===== ロード ===== */
-loadGame();
 
 /* ===== クリック ===== */
 hatBtn.onclick=()=>{
@@ -146,9 +159,7 @@ hatBtn.onclick=()=>{
 /* 自動 */
 setInterval(()=>{
  if(paused)return;
- let g=(worker*0.05*workerLv)+(factory*1.0);
- hats+=g;
- autoBuffer+=g;
+ hats+=(worker*0.05*workerLv)+(factory*1.0);
  update();
 },500);
 
@@ -165,30 +176,22 @@ function sellAll(){
 /* 強化 */
 function upgrade(){
  let cost=ceil10(500*Math.pow(1.25,upgradeCount));
- if(money>=cost){
-  money-=cost;price+=10;upgradeCount++;
- }
+ if(money>=cost){money-=cost;price+=10;upgradeCount++;}
 }
 function hire(){
  let c=ceil10(100*Math.pow(1.5,worker));
- if(money>=c && worker<MAX){
-  money-=c;worker++;
- }
+ if(money>=c){money-=c;worker++;}
 }
 function train(){
  let c=ceil10(2000*Math.pow(2.2,workerLv-1));
- if(money>=c && workerLv<MAX){
-  money-=c;workerLv++;
- }
+ if(money>=c){money-=c;workerLv++;}
 }
 function build(){
  let c=ceil10(5000*Math.pow(2,factory));
- if(money>=c && factory<MAX){
-  money-=c;factory++;
- }
+ if(money>=c){money-=c;factory++;}
 }
 
-/* ===== 操作 ===== */
+/* 操作 */
 function saveAndPause(){saveGame();paused=true;}
 function resumeGame(){paused=false;}
 function confirmPrestige(){prestige();}
@@ -199,11 +202,11 @@ function prestige(){
  money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
 }
 function resetGame(){
- localStorage.removeItem("knitSave");
+ localStorage.removeItem(SAVE_KEY);
  location.reload();
 }
 
-/* ===== 更新 ===== */
+/* 更新 */
 function update(){
  moneyEl.innerText="所持金："+formatMoney(money);
  hatEl.innerText=Math.floor(hats);
@@ -217,12 +220,10 @@ function update(){
  workerCost.innerText=formatCost(ceil10(100*Math.pow(1.5,worker)));
  trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
  factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
-
- saveGame();
 }
 
-setInterval(update,1000);
 update();
 </script>
+
 </body>
 </html>
