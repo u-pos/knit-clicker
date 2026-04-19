@@ -13,23 +13,21 @@ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable
 <style>
 html,body{
  margin:0;
+ padding:0;
  height:100%;
  overflow:hidden;
  background:#000;
  font-family:'DotGothic16',sans-serif;
  touch-action:none;
+ position:fixed;
+ width:100%;
 }
 
-/* ズーム完全禁止 */
-body{
- overscroll-behavior:none;
-}
-
-/* ===== 全体 ===== */
+/* ===== iOS高さバグ対策 ===== */
 #game{
  position:relative;
  width:100%;
- height:100vh;
+ height:calc(var(--vh, 1vh) * 100);
  overflow:hidden;
 }
 
@@ -53,7 +51,7 @@ body{
  border-radius:8px;
 }
 
-/* ===== 操作ボタン ===== */
+/* ボタン群 */
 .grid{
  display:grid;
  grid-template-columns:1fr 1fr;
@@ -63,28 +61,25 @@ body{
 
 .ctrl{
  background:#222;
- color:#fff;
- text-align:center;
  padding:6px;
- font-size:12px;
+ text-align:center;
 }
 
 .ctrl:active{
  background:#a00;
 }
 
-/* ===== 納品 ===== */
+/* 納品 */
 .deliver{
  position:absolute;
  top:10px;
  right:10px;
 }
-
 .deliver img{
  width:130px;
 }
 
-/* ===== 帽子 ===== */
+/* 帽子 */
 .hat{
  position:absolute;
  left:50%;
@@ -94,7 +89,7 @@ body{
  transition:0.1s;
 }
 
-/* ===== 下ボタン ===== */
+/* 下ボタン */
 .bottom{
  position:absolute;
  bottom:0;
@@ -102,7 +97,13 @@ body{
  display:grid;
  grid-template-columns:1fr 1fr;
  gap:6px;
- padding:6px;
+ padding:10px;
+}
+
+.btn{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
 }
 
 .btn img{
@@ -111,24 +112,12 @@ body{
 
 /* コスト */
 .cost{
- text-align:center;
- color:#fff;
+ margin-top:-2px;
  font-size:14px;
- margin-top:-4px;
-}
-
-/* ===== ポップ ===== */
-.pop{
- position:absolute;
  color:#fff;
- animation:pop 0.8s forwards;
 }
 
-@keyframes pop{
- 100%{opacity:0;transform:translateY(-60px);}
-}
-
-/* ===== PC ===== */
+/* PC */
 @media(min-width:769px){
  #game{
   width:1280px;
@@ -140,12 +129,12 @@ body{
   grid-template-columns:repeat(4,1fr);
  }
 
- .deliver img{
-  width:260px;
- }
-
  .hat{
   width:300px;
+ }
+
+ .deliver img{
+  width:260px;
  }
 }
 </style>
@@ -188,7 +177,7 @@ body{
 
  <div class="btn" onclick="upgrade(this)">
   <img src="btn_upgrade2.png">
-  <div class="cost" id="priceCost"></div>
+  <div class="cost" id="upgradeCost"></div>
  </div>
 
  <div class="btn" onclick="train(this)">
@@ -206,6 +195,14 @@ body{
 </div>
 
 <script>
+
+/* ===== iOS高さ補正 ===== */
+function setVH(){
+ let vh = window.innerHeight * 0.01;
+ document.documentElement.style.setProperty('--vh', vh + 'px');
+}
+setVH();
+window.addEventListener('resize', setVH);
 
 /* ===== 音 ===== */
 function play(src){
@@ -225,7 +222,6 @@ let upgradeCount=0;
 
 /* ===== 表示 ===== */
 function update(){
-
  document.getElementById("money").innerText="所持金："+money+"円";
  document.getElementById("hatCount").innerText=hats;
  document.getElementById("price").innerText=price;
@@ -234,10 +230,10 @@ function update(){
  document.getElementById("factory").innerText=factory;
  document.getElementById("soul").innerText=soul;
 
- document.getElementById("priceCost").innerText=500*Math.pow(1.25,upgradeCount)|0+"円";
- document.getElementById("workerCost").innerText=100*Math.pow(1.5,worker)|0+"円";
- document.getElementById("trainCost").innerText=2000*Math.pow(2,workerLv)|0+"円";
- document.getElementById("factoryCost").innerText=5000*Math.pow(2,factory)|0+"円";
+ document.getElementById("upgradeCost").innerText=Math.ceil(500*Math.pow(1.25,upgradeCount)/10)*10+"円";
+ document.getElementById("workerCost").innerText=Math.ceil(100*Math.pow(1.5,worker)/10)*10+"円";
+ document.getElementById("trainCost").innerText=Math.ceil(2000*Math.pow(2,workerLv)/10)*10+"円";
+ document.getElementById("factoryCost").innerText=Math.ceil(5000*Math.pow(2,factory)/10)*10+"円";
 }
 
 /* ===== エフェクト ===== */
@@ -267,56 +263,96 @@ function sellAll(){
   money+=hats*price;
   hats=0;
   play("money.mp3");
+  update();
  }
- update();
 }
 
 /* ===== 強化 ===== */
 function upgrade(el){
- let cost=500*Math.pow(1.25,upgradeCount)|0;
+ let cost=Math.ceil(500*Math.pow(1.25,upgradeCount)/10)*10;
  if(money>=cost){
   money-=cost;
   price+=10;
   upgradeCount++;
   play("up.mp3");
   press(el);
+  update();
  }
 }
 
 function hire(el){
- let cost=100*Math.pow(1.5,worker)|0;
+ let cost=Math.ceil(100*Math.pow(1.5,worker)/10)*10;
  if(money>=cost){
   money-=cost;
   worker++;
   play("up.mp3");
   press(el);
+  update();
  }
 }
 
 function train(el){
- let cost=2000*Math.pow(2,workerLv)|0;
+ let cost=Math.ceil(2000*Math.pow(2,workerLv)/10)*10;
  if(money>=cost){
   money-=cost;
   workerLv++;
   play("up.mp3");
   press(el);
+  update();
  }
 }
 
 function build(el){
- let cost=5000*Math.pow(2,factory)|0;
+ let cost=Math.ceil(5000*Math.pow(2,factory)/10)*10;
  if(money>=cost){
   money-=cost;
   factory++;
   play("up.mp3");
   press(el);
+  update();
  }
 }
 
-/* ===== 初期 ===== */
+/* ===== 転生 ===== */
+function confirmPrestige(){
+ play("click.mp3");
+
+ if(money<100000000){
+  alert("1億円以下では転生できません");
+  return;
+ }
+
+ if(confirm("本当に転生しますか？")){
+  soul++;
+  money=0; hats=0; price=100; worker=0; factory=0; workerLv=1; upgradeCount=0;
+  update();
+ }
+}
+
+/* ===== 廃業 ===== */
+function confirmReset(){
+ play("click.mp3");
+ if(confirm("本当に廃業しますか？")){
+  location.reload();
+ }
+}
+
+/* ===== 中断 ===== */
+function saveAndPause(){
+ play("click.mp3");
+ bgm.pause();
+}
+
+/* ===== 再開 ===== */
+function resumeGame(){
+ play("click.mp3");
+ bgm.play().catch(()=>{});
+}
+
+/* 初期 */
 update();
 
-/* ===== ズーム完全防止 ===== */
+/* ===== 完全ズーム防止 ===== */
 document.addEventListener('touchmove', e => e.preventDefault(), { passive:false });
 
 </script>
