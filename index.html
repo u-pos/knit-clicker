@@ -41,7 +41,7 @@ body{
   line-height:2.2;
 }
 
-/* ボタン配置 */
+/* 操作ボタン */
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -67,7 +67,17 @@ body{
   transition:0.1s;
 }
 
-/* ボタン */
+/* 納品 */
+.deliver{
+  position:absolute;
+  top:20px;
+  right:40px;
+  width:260px;
+  cursor:pointer;
+}
+.deliver img{ width:100%; }
+
+/* 下 */
 .bottom{
   position:absolute;
   bottom:0;
@@ -119,6 +129,7 @@ body{
 <div id="game">
 <img src="bg.jpg" class="bg">
 
+<!-- 左パネル -->
 <div class="panel">
   <div class="panel-text">
     <div id="money"></div>
@@ -137,8 +148,15 @@ body{
   </div>
 </div>
 
+<!-- ニット -->
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
+<!-- 納品 -->
+<div class="deliver" onclick="sellAll(this)">
+  <img src="btn_deliver2.png">
+</div>
+
+<!-- 下ボタン -->
 <div class="bottom">
   <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
   <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
@@ -148,8 +166,10 @@ body{
 
 </div>
 
+<!-- 音 -->
 <audio id="clickSound" src="click.mp3"></audio>
 <audio id="upSound" src="up.mp3"></audio>
+<audio id="moneySound" src="money.mp3"></audio>
 
 <script>
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
@@ -157,7 +177,7 @@ let upgradeCount=0;
 let autoBuffer=0;
 let paused=false;
 
-/* フォーマット */
+/* 表示 */
 function format(n){
   if(n>=1e8)return(n/1e8).toFixed(2)+"億円";
   if(n>=1e4)return(n/1e4).toFixed(2)+"万円";
@@ -186,13 +206,17 @@ function spawnPop(x,y,text){
   setTimeout(()=>p.remove(),800);
 }
 
-/* ボタンエフェクト */
 function pressEffect(el){
   el.style.transform="scale(0.9)";
   setTimeout(()=>el.style.transform="scale(1)",80);
 }
 
-/* クリック */
+/* 音 */
+const clickSound=document.getElementById("clickSound");
+const upSound=document.getElementById("upSound");
+const moneySound=document.getElementById("moneySound");
+
+/* 手動クリック */
 hatBtn.onclick=()=>{
   if(paused)return;
   hats++;
@@ -221,13 +245,30 @@ setInterval(()=>{
   update();
 },500);
 
-/* 強化系 */
+/* 納品 */
+function sellAll(el){
+  if(paused)return;
+
+  if(hats>0){
+    money+=Math.floor(hats*price);
+    hats=0;
+
+    moneySound.currentTime=0;
+    moneySound.play();
+
+    pressEffect(el);
+  }
+  update();
+}
+
+/* 強化 */
 function upgrade(el){
   let cost=Math.floor(500*Math.pow(1.25,upgradeCount));
   if(money>=cost){
     money-=cost;
     price+=10;
     upgradeCount++;
+
     upSound.currentTime=0;
     upSound.play();
     pressEffect(el);
@@ -262,13 +303,6 @@ function build(el){
     upSound.play();
     pressEffect(el);
   }
-}
-
-/* 納品 */
-function sellAll(){
-  if(paused)return;
-  money+=Math.floor(hats*price);
-  hats=0;
 }
 
 /* 制御 */
@@ -345,9 +379,6 @@ const priceCost=document.getElementById("priceCost");
 const workerCost=document.getElementById("workerCost");
 const trainCost=document.getElementById("trainCost");
 const factoryCost=document.getElementById("factoryCost");
-
-const clickSound=document.getElementById("clickSound");
-const upSound=document.getElementById("upSound");
 
 update();
 </script>
