@@ -102,8 +102,8 @@ function formatMoney(n){
 
 function formatCost(n){
  n=Math.floor(n);
- if(n>=1e8)  return (Math.floor(n/1e6)/100)+"億円";
- if(n>=1e4)  return (Math.floor(n/100)/100)+"万円";
+ if(n>=1e8) return (Math.floor(n/1e6)/100)+"億円";
+ if(n>=1e4) return (Math.floor(n/100)/100)+"万円";
  return n+"円";
 }
 
@@ -148,11 +148,35 @@ const workerCost=document.getElementById("workerCost");
 const trainCost=document.getElementById("trainCost");
 const factoryCost=document.getElementById("factoryCost");
 
+/* ===== エフェクト ===== */
+function spawnPop(val){
+ const r=hatBtn.getBoundingClientRect();
+ const p=document.createElement("div");
+ p.className="pop";
+ p.innerText="+"+val;
+ p.style.left=(r.left+r.width*0.7)+"px";
+ p.style.top=(r.top+r.height*0.1)+"px";
+ document.body.appendChild(p);
+ setTimeout(()=>p.remove(),800);
+}
+
+function hatEffect(val){
+ spawnPop(val);
+ hatBtn.style.transform="scale(0.9)";
+ setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+}
+
+function pressEffect(el){
+ el.style.transform="scale(0.9)";
+ setTimeout(()=>el.style.transform="scale(1)",80);
+}
+
 /* ===== クリック ===== */
 hatBtn.onclick=()=>{
  if(paused)return;
  hats++;
  playClick();
+ hatEffect(1);
  update();
 };
 
@@ -161,6 +185,13 @@ setInterval(()=>{
  if(paused)return;
  let g=(worker*0.05*workerLv)+(factory*1.0);
  hats+=g;
+ autoBuffer+=g;
+
+ let t=Math.floor(autoBuffer);
+ if(t>=1){
+  autoBuffer-=t;
+  hatEffect(t);
+ }
  update();
 },500);
 
@@ -171,6 +202,7 @@ function sellAll(el){
   money+=Math.floor(hats*price);
   hats=0;
   playMoney();
+  pressEffect(el);
  }
  update();
 }
@@ -181,6 +213,7 @@ function upgrade(el){
  if(money>=cost && price<MAX){
   money-=cost;price+=10;upgradeCount++;
   playUp();
+  pressEffect(el);
  }
 }
 function hire(el){
@@ -188,6 +221,7 @@ function hire(el){
  if(money>=c && worker<MAX){
   money-=c;worker++;
   playUp();
+  pressEffect(el);
  }
 }
 function train(el){
@@ -195,6 +229,7 @@ function train(el){
  if(money>=c && workerLv<MAX){
   money-=c;workerLv++;
   playUp();
+  pressEffect(el);
  }
 }
 function build(el){
@@ -202,8 +237,44 @@ function build(el){
  if(money>=c && factory<MAX){
   money-=c;factory++;
   playUp();
+  pressEffect(el);
  }
 }
+
+/* ===== モーダル ===== */
+function openModal(text,buttons){
+ modal.classList.add("active");
+ modalText.innerText=text;
+ modalButtons.innerHTML=buttons;
+}
+function closeModal(){modal.classList.remove("active");}
+
+function confirmPrestige(){
+ playClick();
+ if(money<100000000){
+  openModal("1億円以下では転生できません","<button onclick='closeModal()'>OK</button>");
+ }else{
+  openModal("本当に転生しますか？",
+   "<button onclick='prestige();closeModal()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+ }
+}
+
+function confirmReset(){
+ playClick();
+ openModal("本当に廃業しますか？",
+  "<button onclick='resetGame()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+}
+
+/* ===== その他 ===== */
+function prestige(){
+ let g=Math.floor(Math.sqrt(money/1e8));
+ soul+=g;
+ money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
+ update();
+}
+function saveAndPause(){paused=true;}
+function resumeGame(){paused=false;bgm.play().catch(()=>{});}
+function resetGame(){location.reload();}
 
 /* ===== 更新 ===== */
 function update(){
