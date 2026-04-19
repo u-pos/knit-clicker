@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ニット帽クリッカー</title>
 
 <style>
@@ -10,46 +10,16 @@ body{
   margin:0;
   background:#000;
   font-family:sans-serif;
+  touch-action: manipulation;
   overflow:hidden;
 }
 
-/* ===== 共通 ===== */
-.hidden{display:none;}
-button{cursor:pointer}
-
-/* ===== PC UI ===== */
-#pc-ui{
-  width:1280px;
-  height:720px;
-  margin:auto;
-  position:relative;
-  background:#111;
-  color:#fff;
+/* ズーム防止 */
+*{
+  touch-action: manipulation;
 }
 
-.pc-panel{
-  position:absolute;
-  left:20px;
-  top:20px;
-}
-
-.pc-hat{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:200px;
-}
-
-.pc-bottom{
-  position:absolute;
-  bottom:0;
-  width:100%;
-  display:flex;
-  justify-content:space-around;
-}
-
-/* ===== MOBILE UI ===== */
+/* ===== スマホUI ===== */
 #mobile-ui{
   width:100vw;
   height:100vh;
@@ -58,165 +28,192 @@ button{cursor:pointer}
   color:#fff;
 }
 
-/* 上：ステータス */
-.m-top{
+/* 上 */
+.top{
   padding:10px;
   font-size:18px;
+  line-height:1.6;
 }
 
-/* 中央：帽子 */
-.m-center{
+/* 中央 */
+.center{
   flex:1;
   display:flex;
   justify-content:center;
   align-items:center;
 }
 
-.m-hat{
-  width:180px;
+.hat{
+  width:200px;
+  transition:0.1s;
 }
 
-/* 下：ボタン */
-.m-bottom{
+/* 下 */
+.bottom{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:8px;
   padding:10px;
 }
 
-.m-btn{
-  background:#333;
-  padding:15px;
-  text-align:center;
+.btn img{
+  width:100%;
 }
 
 /* ポップ */
 .pop{
   position:absolute;
   color:#fff;
+  font-size:20px;
   animation:pop 0.8s forwards;
 }
 @keyframes pop{
-  100%{opacity:0;transform:translateY(-60px);}
+  100%{opacity:0;transform:translateY(-50px);}
 }
 </style>
 </head>
 
 <body>
 
-<!-- PC UI -->
-<div id="pc-ui">
-  <div class="pc-panel">
-    <div id="pc-money"></div>
-    <div>ニット帽：<span id="pc-hat-count"></span></div>
-  </div>
+<div id="mobile-ui">
 
-  <img src="knit-hat-v2.png" class="pc-hat" id="pc-hat">
-
-  <div class="pc-bottom">
-    <button onclick="upgrade()">強化</button>
-    <button onclick="sellAll()">納品</button>
-  </div>
+<div class="top">
+  <div id="money"></div>
+  <div>ニット帽：<span id="hatCount"></span></div>
+  <div>商品単価：<span id="price"></span>円</div>
+  <div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
+  <div>工場数：<span id="factory"></span>棟</div>
+  <div>転生：<span id="soul"></span>回</div>
 </div>
 
-<!-- MOBILE UI -->
-<div id="mobile-ui">
-  <div class="m-top">
-    <div id="m-money"></div>
-    <div>ニット帽：<span id="m-hat-count"></span></div>
-  </div>
+<div class="center">
+  <img src="knit-hat-v2.png" class="hat" id="hatBtn">
+</div>
 
-  <div class="m-center">
-    <img src="knit-hat-v2.png" class="m-hat" id="m-hat">
-  </div>
+<div class="bottom">
+  <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"></div>
+  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"></div>
+  <div class="btn" onclick="train(this)"><img src="btn_training2.png"></div>
+  <div class="btn" onclick="build(this)"><img src="btn_factory2.png"></div>
+</div>
 
-  <div class="m-bottom">
-    <div class="m-btn" onclick="upgrade()">強化</div>
-    <div class="m-btn" onclick="sellAll()">納品</div>
-  </div>
 </div>
 
 <script>
 
-/* ===== 判定 ===== */
-const isMobile = window.innerWidth <= 768;
-document.getElementById("pc-ui").classList.toggle("hidden", isMobile);
-document.getElementById("mobile-ui").classList.toggle("hidden", !isMobile);
+/* ===== 音 ===== */
+function play(src){
+  new Audio(src).play();
+}
 
 /* ===== 状態 ===== */
-let money=0;
-let hats=0;
-let price=100;
-let paused=false;
+let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
+let autoBuffer=0,paused=false;
 
 /* ===== DOM ===== */
-const pcMoney=document.getElementById("pc-money");
-const pcHat=document.getElementById("pc-hat-count");
-
-const mMoney=document.getElementById("m-money");
-const mHat=document.getElementById("m-hat-count");
-
-const hatBtn = isMobile ? document.getElementById("m-hat") : document.getElementById("pc-hat");
+const hatBtn=document.getElementById("hatBtn");
 
 /* ===== 表示 ===== */
-function update(){
-  const text="所持金："+money+"円";
-  pcMoney.innerText=text;
-  mMoney.innerText=text;
+function formatMoney(n){
+ if(n>=1e8) return (n/1e8).toFixed(2)+"億円";
+ if(n>=1e4) return (n/1e4).toFixed(2)+"万円";
+ return Math.floor(n)+"円";
+}
 
-  pcHat.innerText=hats;
-  mHat.innerText=hats;
+function update(){
+ document.getElementById("money").innerText="所持金："+formatMoney(money);
+ document.getElementById("hatCount").innerText=Math.floor(hats);
+ document.getElementById("price").innerText=price;
+ document.getElementById("worker").innerText=worker;
+ document.getElementById("workerLv").innerText=workerLv;
+ document.getElementById("factory").innerText=factory;
+ document.getElementById("soul").innerText=soul;
 }
 
 /* ===== エフェクト ===== */
 function pop(val){
-  const r=hatBtn.getBoundingClientRect();
-  const p=document.createElement("div");
-  p.className="pop";
-  p.innerText="+"+val;
-  p.style.left=r.left+"px";
-  p.style.top=r.top+"px";
-  document.body.appendChild(p);
-  setTimeout(()=>p.remove(),800);
+ const r=hatBtn.getBoundingClientRect();
+ const p=document.createElement("div");
+ p.className="pop";
+ p.innerText="+"+val;
+ p.style.left=(r.left+r.width*0.7)+"px";
+ p.style.top=(r.top+r.height*0.2)+"px";
+ document.body.appendChild(p);
+ setTimeout(()=>p.remove(),800);
+}
+
+function hatEffect(val){
+ hatBtn.style.transform="scale(0.9)";
+ setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+ pop(val);
 }
 
 /* ===== クリック ===== */
 hatBtn.onclick=()=>{
-  if(paused)return;
-  hats++;
-  pop(1);
-  update();
+ if(paused)return;
+ hats++;
+ play("click.mp3");
+ hatEffect(1);
+ update();
 };
 
 /* ===== 自動 ===== */
 setInterval(()=>{
-  if(paused)return;
-  hats+=1;
-  update();
-},1000);
+ if(paused)return;
+ let g=(worker*0.05*workerLv)+(factory*1.0);
+ hats+=g;
+ autoBuffer+=g;
+
+ let t=Math.floor(autoBuffer);
+ if(t>=1){
+  autoBuffer-=t;
+  hatEffect(t);
+ }
+ update();
+},500);
 
 /* ===== 納品 ===== */
 function sellAll(){
-  if(hats>0){
-    money+=hats*price;
-    hats=0;
-    update();
-  }
+ if(hats>0){
+  money+=Math.floor(hats*price);
+  hats=0;
+  play("money.mp3");
+  update();
+ }
 }
 
 /* ===== 強化 ===== */
-function upgrade(){
-  if(money>=100){
-    money-=100;
-    price+=10;
-    update();
-  }
+function upgrade(el){
+ if(money>=500){
+  money-=500;
+  price+=10;
+  play("up.mp3");
+ }
+}
+function hire(el){
+ if(money>=100){
+  money-=100;
+  worker++;
+  play("up.mp3");
+ }
+}
+function train(el){
+ if(money>=2000){
+  money-=2000;
+  workerLv++;
+  play("up.mp3");
+ }
+}
+function build(el){
+ if(money>=5000){
+  money-=5000;
+  factory++;
+  play("up.mp3");
+ }
 }
 
-/* ===== スマホライフサイクル ===== */
-document.addEventListener("visibilitychange",()=>{
-  paused=document.hidden;
-});
+/* ===== ライフサイクル ===== */
+document.addEventListener("visibilitychange",()=>paused=document.hidden);
 window.addEventListener("blur",()=>paused=true);
 window.addEventListener("focus",()=>paused=false);
 
