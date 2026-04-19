@@ -100,20 +100,27 @@ html,body{
  padding:10px;
 }
 
+/* ボタン全体 */
 .btn{
  display:flex;
  flex-direction:column;
  align-items:center;
+ justify-content:flex-start;   /* ← 余白削除 */
 }
 
+/* 画像 */
 .btn img{
  width:100%;
+ margin:0;                    /* ← 無駄余白削除 */
 }
 
-/* コスト（ボタンに寄せる） */
+/* コスト（ここが本命） */
 .cost{
- margin-top:-8px;
- font-size:14px;
+ font-size:16px;              /* ← 少し大きく */
+ line-height:1;               /* ← 行間詰める */
+ margin-top:-2px;             /* ← ほぼ密着 */
+ margin-bottom:0;
+ padding:0;
  color:#fff;
 }
 
