@@ -6,33 +6,93 @@
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 
 <style>
-body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:'DotGothic16';}
+body{
+  margin:0;
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:'DotGothic16';
+}
 #game{width:1280px;height:720px;position:relative;}
 .bg{position:absolute;width:100%;height:100%;}
 
-.panel{position:absolute;top:20px;left:20px;width:340px;padding:18px;background:rgba(0,0,0,0.85);border-radius:12px;}
-.panel-text{color:#ffd700;font-size:26px;line-height:2.0;}
+/* 左パネル */
+.panel{
+  position:absolute;
+  top:20px;left:20px;
+  width:340px;
+  padding:18px;
+  background:rgba(0,0,0,0.85);
+  border-radius:12px;
+}
+.panel-text{
+  color:#ffd700;
+  font-size:26px;
+  line-height:2.0;
+}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
-.ctrl{background:#222;color:#fff;padding:10px;text-align:center;cursor:pointer;}
+/* ニット */
+.hat{
+  position:absolute;
+  top:150px;
+  left:540px;
+  width:360px;
+  cursor:pointer;
+  transition:0.1s;
+}
 
-.hat{position:absolute;top:170px;left:540px;width:360px;cursor:pointer;transition:0.1s;}
-
-.deliver{position:absolute;top:20px;right:40px;width:260px;cursor:pointer;}
+/* 納品 */
+.deliver{
+  position:absolute;
+  top:20px;
+  right:40px;
+  width:260px;
+  cursor:pointer;
+}
 .deliver img{width:100%;}
 
-.bottom{position:absolute;bottom:0;width:100%;height:200px;}
-.btn{position:absolute;width:280px;height:200px;cursor:pointer;}
+/* 下ボタン */
+.bottom{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height:200px;
+}
+.btn{
+  position:absolute;
+  width:280px;
+  height:200px;
+  cursor:pointer;
+}
 .btn:nth-child(1){left:40px;}
 .btn:nth-child(2){left:360px;}
 .btn:nth-child(3){left:680px;}
 .btn:nth-child(4){left:1000px;}
+.btn img{position:absolute;bottom:0;width:100%;}
 
-.price{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);color:#fff;font-size:28px;}
+.price{
+  position:absolute;
+  bottom:5px;
+  left:50%;
+  transform:translateX(-50%);
+  color:#fff;
+  font-size:28px;
+}
 
-.pop{position:absolute;color:#fff;font-size:28px;animation:pop 0.8s forwards;}
-@keyframes pop{100%{opacity:0;transform:translateY(-60px);}}
+/* ポップ */
+.pop{
+  position:absolute;
+  color:#fff;
+  font-size:28px;
+  animation:pop 0.8s forwards;
+}
+@keyframes pop{
+  100%{opacity:0;transform:translateY(-60px);}
+}
 
+/* モーダル */
 .modal{
   position:absolute;
   top:50%;left:50%;
@@ -41,10 +101,12 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
   padding:20px;
   border:2px solid #fff;
   text-align:center;
+  z-index:999;
   display:none;
 }
 .modal.active{display:block;}
 #modalText{color:#fff;font-size:24px;}
+.modal button{margin:10px;padding:10px;}
 </style>
 </head>
 
@@ -66,37 +128,208 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
 
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
+<div class="deliver" onclick="sellAll(this)">
+  <img src="btn_deliver2.png">
 </div>
 
-<script>
-let money=0,hats=0;
+<div class="bottom">
+  <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
+  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
+  <div class="btn" onclick="train(this)"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
+  <div class="btn" onclick="build(this)"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
+</div>
 
-/* 表示フォーマット */
+<div class="modal" id="modal">
+  <div id="modalText"></div>
+  <div id="modalButtons"></div>
+</div>
+
+</div>
+
+<audio id="clickSound" src="click.mp3"></audio>
+<audio id="upSound" src="up.mp3"></audio>
+<audio id="moneySound" src="money.mp3"></audio>
+<audio id="bgm" src="bgm.mp3" loop></audio>
+
+<script>
+let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
+let upgradeCount=0,autoBuffer=0;
+
+const hatBtn=document.getElementById("hatBtn");
+const modal=document.getElementById("modal");
+const modalText=document.getElementById("modalText");
+const modalButtons=document.getElementById("modalButtons");
+
+const clickSound=document.getElementById("clickSound");
+const upSound=document.getElementById("upSound");
+const moneySound=document.getElementById("moneySound");
+const bgm=document.getElementById("bgm");
+
+/* 音 */
+function playClick(){clickSound.cloneNode().play();}
+function playUp(){upSound.cloneNode().play();}
+function playMoney(){moneySound.cloneNode().play();}
+
+bgm.volume=0.3;
+bgm.play().catch(()=>{}); // 自動再生対策
+
+/* 金額フォーマット */
 function formatMoney(n){
   if(n>=1e8) return (n/1e8).toFixed(2)+"億円";
   if(n>=1e4) return (n/1e4).toFixed(2)+"万円";
-  return Math.floor(n)+"円"; // ← 小数禁止
+  return Math.floor(n)+"円";
 }
 
-/* 切り上げ（10円単位） */
+/* 10円切り上げ */
 function ceil10(n){
   return Math.ceil(n/10)*10;
 }
 
-/* ポップ位置（右上） */
+/* ポップ（右上） */
 function spawnPop(val){
   const r=hatBtn.getBoundingClientRect();
-
   const p=document.createElement("div");
   p.className="pop";
   p.innerText="+"+val;
-
-  p.style.left=(r.left + r.width*0.7)+"px";  // ←右寄り
-  p.style.top=(r.top + r.height*0.1)+"px";   // ←上寄り
-
+  p.style.left=(r.left+r.width*0.7)+"px";
+  p.style.top=(r.top+r.height*0.1)+"px";
   document.body.appendChild(p);
   setTimeout(()=>p.remove(),800);
 }
+
+/* エフェクト */
+function hatEffect(val){
+  spawnPop(val);
+  hatBtn.style.transform="scale(0.9)";
+  setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+}
+function pressEffect(el){
+  el.style.transform="scale(0.9)";
+  setTimeout(()=>el.style.transform="scale(1)",80);
+}
+
+/* クリック */
+hatBtn.onclick=()=>{
+  hats++;
+  playClick();
+  hatEffect(1);
+  update();
+};
+
+/* 自動 */
+setInterval(()=>{
+  let g=(worker*0.05*workerLv)+(factory*1.0);
+  hats+=g;
+  autoBuffer+=g;
+
+  let t=Math.floor(autoBuffer);
+  if(t>=1){
+    autoBuffer-=t;
+    hatEffect(t);
+  }
+  update();
+},500);
+
+/* 納品 */
+function sellAll(el){
+  if(hats>0){
+    money+=Math.floor(hats*price);
+    hats=0;
+    playMoney();
+    pressEffect(el);
+  }
+  update();
+}
+
+/* 強化 */
+function upgrade(el){
+  let cost=ceil10(500*Math.pow(1.25,upgradeCount));
+  if(money>=cost){
+    money-=cost;price+=10;upgradeCount++;
+    playUp();pressEffect(el);
+  }
+}
+
+function hire(el){
+  let c=ceil10(100*Math.pow(1.5,worker));
+  if(money>=c){
+    money-=c;worker++;
+    playUp();pressEffect(el);
+  }
+}
+
+function train(el){
+  let c=ceil10(2000*Math.pow(2.2,workerLv-1));
+  if(money>=c){
+    money-=c;workerLv++;
+    playUp();pressEffect(el);
+  }
+}
+
+function build(el){
+  let c=ceil10(5000*Math.pow(2,factory));
+  if(money>=c){
+    money-=c;factory++;
+    playUp();pressEffect(el);
+  }
+}
+
+/* モーダル */
+function openModal(text,buttons){
+  modal.classList.add("active");
+  modalText.innerText=text;
+  modalButtons.innerHTML=buttons;
+}
+function closeModal(){
+  modal.classList.remove("active");
+}
+
+/* 転生 */
+function confirmPrestige(){
+  playClick();
+  if(money<100000000){
+    openModal("1億円以下では転生できません","<button onclick='closeModal()'>OK</button>");
+  }else{
+    openModal("本当に転生しますか？",
+      "<button onclick='prestige();closeModal()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+  }
+}
+function prestige(){
+  let g=Math.floor(Math.sqrt(money/1e8));
+  soul+=g;
+  money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
+}
+
+/* 更新 */
+function update(){
+  moneyEl.innerText="所持金："+formatMoney(money);
+  hatEl.innerText=Math.floor(hats);
+  priceEl.innerText=price;
+  workerEl.innerText=worker;
+  workerLvEl.innerText=workerLv;
+  factoryEl.innerText=factory;
+  soulEl.innerText=soul;
+
+  priceCost.innerText=ceil10(500*Math.pow(1.25,upgradeCount))+"円";
+  workerCost.innerText=ceil10(100*Math.pow(1.5,worker))+"円";
+  trainCost.innerText=ceil10(2000*Math.pow(2.2,workerLv-1))+"円";
+  factoryCost.innerText=ceil10(5000*Math.pow(2,factory))+"円";
+}
+
+const moneyEl=document.getElementById("money");
+const hatEl=document.getElementById("hat");
+const priceEl=document.getElementById("price");
+const workerEl=document.getElementById("worker");
+const workerLvEl=document.getElementById("workerLv");
+const factoryEl=document.getElementById("factory");
+const soulEl=document.getElementById("soul");
+
+const priceCost=document.getElementById("priceCost");
+const workerCost=document.getElementById("workerCost");
+const trainCost=document.getElementById("trainCost");
+const factoryCost=document.getElementById("factoryCost");
+
+update();
 </script>
 
 </body>
