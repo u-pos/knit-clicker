@@ -107,7 +107,7 @@ document.addEventListener("click",()=>{
 
 /* ===== 状態 ===== */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
-let upgradeCount=0,autoBuffer=0,paused=false;
+let upgradeCount=0,autoBuffer=0,paused=true;
 
 /* ===== 保存 ===== */
 function saveGame(){
@@ -118,6 +118,7 @@ function saveGame(){
 function loadGame(){
  const d=JSON.parse(localStorage.getItem(SAVE_KEY));
  if(!d)return;
+
  money=d.money||0;
  hats=d.hats||0;
  price=d.price||100;
@@ -126,6 +127,10 @@ function loadGame(){
  workerLv=d.workerLv||1;
  soul=d.soul||0;
  upgradeCount=d.upgradeCount||0;
+
+ autoBuffer=0;
+
+ paused=true; // ←これを追加（復帰時は必ず停止）
 }
 loadGame();
 
