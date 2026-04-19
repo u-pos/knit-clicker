@@ -2,144 +2,151 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+
 <title>ニット帽クリッカー</title>
 
 <style>
-/* ===== 基本 ===== */
 html,body{
-  margin:0;
-  padding:0;
-  height:100%;
-  overflow:hidden;                 /* スクロール禁止 */
-  background:#000;
-  font-family:sans-serif;
-  -webkit-user-select:none;
-  user-select:none;
-  touch-action: manipulation;      /* ダブルタップズーム抑制 */
+ margin:0;
+ height:100%;
+ overflow:hidden;
+ background:#000;
+ font-family:'DotGothic16',sans-serif;
+ touch-action:none;
 }
 
-/* ズーム/ジェスチャ抑制（追加保険） */
-*{
-  touch-action: manipulation;
+/* ズーム完全禁止 */
+body{
+ overscroll-behavior:none;
 }
 
-/* ===== 共通コンテナ ===== */
+/* ===== 全体 ===== */
 #game{
-  position:relative;
-  width:100%;
-  height:100vh;
-  overflow:hidden;
+ position:relative;
+ width:100%;
+ height:100vh;
+ overflow:hidden;
 }
 
 /* 背景 */
 .bg{
-  position:absolute;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  z-index:0;
+ position:absolute;
+ width:100%;
+ height:100%;
+ object-fit:cover;
 }
 
-/* ===== ステータス（左上） ===== */
+/* ===== パネル ===== */
 .panel{
-  position:absolute;
-  top:10px;
-  left:10px;
-  z-index:10;
-  background:rgba(0,0,0,0.6);
-  padding:10px;
-  color:#fff;
-  font-size:16px;
-  border-radius:8px;
+ position:absolute;
+ top:10px;
+ left:10px;
+ background:rgba(0,0,0,0.6);
+ padding:10px;
+ color:#fff;
+ font-size:16px;
+ border-radius:8px;
 }
 
-/* コントロール（転生など） */
+/* ===== 操作ボタン ===== */
 .grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:4px;
-  margin-top:6px;
-}
-.ctrl{
-  background:#222;
-  color:#fff;
-  text-align:center;
-  padding:6px;
-  font-size:12px;
-}
-.ctrl:active{
-  background:#a00;
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:4px;
+ margin-top:5px;
 }
 
-/* ===== 納品ボタン ===== */
-.deliver{
-  position:absolute;
-  top:10px;
-  right:10px;
-  z-index:10;
+.ctrl{
+ background:#222;
+ color:#fff;
+ text-align:center;
+ padding:6px;
+ font-size:12px;
 }
+
+.ctrl:active{
+ background:#a00;
+}
+
+/* ===== 納品 ===== */
+.deliver{
+ position:absolute;
+ top:10px;
+ right:10px;
+}
+
 .deliver img{
-  width:140px;
+ width:130px;
 }
 
 /* ===== 帽子 ===== */
 .hat{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:220px;
-  transition:0.1s;
-  z-index:5;
+ position:absolute;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+ width:220px;
+ transition:0.1s;
 }
 
-/* ===== 下ボタン（スマホ） ===== */
+/* ===== 下ボタン ===== */
 .bottom{
-  position:absolute;
-  bottom:0;
-  width:100%;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:6px;
-  padding:6px;
-  z-index:10;
+ position:absolute;
+ bottom:0;
+ width:100%;
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:6px;
+ padding:6px;
 }
+
 .btn img{
-  width:100%;
+ width:100%;
+}
+
+/* コスト */
+.cost{
+ text-align:center;
+ color:#fff;
+ font-size:14px;
+ margin-top:-4px;
 }
 
 /* ===== ポップ ===== */
 .pop{
-  position:absolute;
-  color:#fff;
-  font-size:18px;
-  animation:pop 0.8s forwards;
-  z-index:20;
+ position:absolute;
+ color:#fff;
+ animation:pop 0.8s forwards;
 }
+
 @keyframes pop{
-  100%{opacity:0; transform:translateY(-60px);}
+ 100%{opacity:0;transform:translateY(-60px);}
 }
 
-/* ===== PC時（横UIに戻す） ===== */
+/* ===== PC ===== */
 @media(min-width:769px){
-  #game{
-    width:1280px;
-    height:720px;
-    margin:auto;
-  }
+ #game{
+  width:1280px;
+  height:720px;
+  margin:auto;
+ }
 
-  .hat{
-    width:300px;
-  }
+ .bottom{
+  grid-template-columns:repeat(4,1fr);
+ }
 
-  .bottom{
-    grid-template-columns:repeat(4,1fr);
-  }
+ .deliver img{
+  width:260px;
+ }
 
-  .deliver img{
-    width:260px;
-  }
+ .hat{
+  width:300px;
+ }
 }
 </style>
 </head>
@@ -150,37 +157,50 @@ html,body{
 
 <img src="bg.jpg" class="bg">
 
-<!-- ステータス -->
 <div class="panel">
-  <div id="money"></div>
-  <div>ニット帽：<span id="hatCount"></span></div>
-  <div>商品単価：<span id="price"></span>円</div>
-  <div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
-  <div>工場数：<span id="factory"></span>棟</div>
-  <div>転生：<span id="soul"></span>回</div>
+ <div id="money"></div>
+ <div>ニット帽：<span id="hatCount"></span></div>
+ <div>商品単価：<span id="price"></span>円</div>
+ <div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
+ <div>工場数：<span id="factory"></span>棟</div>
+ <div>転生：<span id="soul"></span>回</div>
 
-  <div class="grid">
-    <div class="ctrl" onclick="confirmPrestige()">転生</div>
-    <div class="ctrl" onclick="saveAndPause()">中断</div>
-    <div class="ctrl" onclick="resumeGame()">再開</div>
-    <div class="ctrl" onclick="confirmReset()">廃業</div>
-  </div>
+ <div class="grid">
+  <div class="ctrl" onclick="confirmPrestige()">転生する</div>
+  <div class="ctrl" onclick="saveAndPause()">保存して中断</div>
+  <div class="ctrl" onclick="resumeGame()">再開する</div>
+  <div class="ctrl" onclick="confirmReset()">廃業する</div>
+ </div>
 </div>
 
-<!-- 納品 -->
 <div class="deliver" onclick="sellAll()">
-  <img src="btn_deliver2.png">
+ <img src="btn_deliver2.png">
 </div>
 
-<!-- 帽子 -->
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
-<!-- 下ボタン -->
 <div class="bottom">
-  <div class="btn" onclick="hire()"><img src="btn_worker2.png"></div>
-  <div class="btn" onclick="upgrade()"><img src="btn_upgrade2.png"></div>
-  <div class="btn" onclick="train()"><img src="btn_training2.png"></div>
-  <div class="btn" onclick="build()"><img src="btn_factory2.png"></div>
+
+ <div class="btn" onclick="hire(this)">
+  <img src="btn_worker2.png">
+  <div class="cost" id="workerCost"></div>
+ </div>
+
+ <div class="btn" onclick="upgrade(this)">
+  <img src="btn_upgrade2.png">
+  <div class="cost" id="priceCost"></div>
+ </div>
+
+ <div class="btn" onclick="train(this)">
+  <img src="btn_training2.png">
+  <div class="cost" id="trainCost"></div>
+ </div>
+
+ <div class="btn" onclick="build(this)">
+  <img src="btn_factory2.png">
+  <div class="cost" id="factoryCost"></div>
+ </div>
+
 </div>
 
 </div>
@@ -188,169 +208,116 @@ html,body{
 <script>
 
 /* ===== 音 ===== */
-const bgm = new Audio("bgm.mp3");
-bgm.loop = true;
-bgm.volume = 0.3;
-
 function play(src){
-  new Audio(src).play();
+ new Audio(src).play();
 }
 
-/* 初回タップでBGM */
-let bgmStarted=false;
+const bgm = new Audio("bgm.mp3");
+bgm.loop=true;
+
 document.addEventListener("click",()=>{
-  if(!bgmStarted){
-    bgm.play().catch(()=>{});
-    bgmStarted=true;
-  }
+ bgm.play().catch(()=>{});
 },{once:true});
 
 /* ===== 状態 ===== */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
-let autoBuffer=0,paused=false;
+let upgradeCount=0;
 
 /* ===== 表示 ===== */
-function formatMoney(n){
- if(n>=1e8) return (n/1e8).toFixed(2)+"億円";
- if(n>=1e4) return (n/1e4).toFixed(2)+"万円";
- return Math.floor(n)+"円";
-}
-
 function update(){
- document.getElementById("money").innerText="所持金："+formatMoney(money);
- document.getElementById("hatCount").innerText=Math.floor(hats);
+
+ document.getElementById("money").innerText="所持金："+money+"円";
+ document.getElementById("hatCount").innerText=hats;
  document.getElementById("price").innerText=price;
  document.getElementById("worker").innerText=worker;
  document.getElementById("workerLv").innerText=workerLv;
  document.getElementById("factory").innerText=factory;
  document.getElementById("soul").innerText=soul;
+
+ document.getElementById("priceCost").innerText=500*Math.pow(1.25,upgradeCount)|0+"円";
+ document.getElementById("workerCost").innerText=100*Math.pow(1.5,worker)|0+"円";
+ document.getElementById("trainCost").innerText=2000*Math.pow(2,workerLv)|0+"円";
+ document.getElementById("factoryCost").innerText=5000*Math.pow(2,factory)|0+"円";
 }
 
 /* ===== エフェクト ===== */
 const hatBtn=document.getElementById("hatBtn");
 
-function pop(val){
- const r=hatBtn.getBoundingClientRect();
- const p=document.createElement("div");
- p.className="pop";
- p.innerText="+"+val;
- p.style.left=(r.left+r.width*0.7)+"px";
- p.style.top=(r.top+r.height*0.2)+"px";
- document.body.appendChild(p);
- setTimeout(()=>p.remove(),800);
+function press(el){
+ el.style.transform="scale(0.9)";
+ setTimeout(()=>el.style.transform="scale(1)",80);
 }
 
-function hatEffect(val){
+function hatEffect(){
  hatBtn.style.transform="translate(-50%,-50%) scale(0.9)";
  setTimeout(()=>hatBtn.style.transform="translate(-50%,-50%) scale(1)",80);
- pop(val);
 }
 
 /* ===== クリック ===== */
 hatBtn.onclick=()=>{
- if(paused)return;
  hats++;
  play("click.mp3");
- hatEffect(1);
+ hatEffect();
  update();
 };
-
-/* ===== 自動 ===== */
-setInterval(()=>{
- if(paused)return;
- let g=(worker*0.05*workerLv)+(factory*1.0);
- hats+=g;
- autoBuffer+=g;
-
- let t=Math.floor(autoBuffer);
- if(t>=1){
-  autoBuffer-=t;
-  hatEffect(t);
- }
- update();
-},500);
 
 /* ===== 納品 ===== */
 function sellAll(){
  if(hats>0){
-  money+=Math.floor(hats*price);
+  money+=hats*price;
   hats=0;
   play("money.mp3");
-  update();
  }
+ update();
 }
 
 /* ===== 強化 ===== */
-function upgrade(){
- if(money>=500){
-  money-=500;
+function upgrade(el){
+ let cost=500*Math.pow(1.25,upgradeCount)|0;
+ if(money>=cost){
+  money-=cost;
   price+=10;
+  upgradeCount++;
   play("up.mp3");
+  press(el);
  }
 }
-function hire(){
- if(money>=100){
-  money-=100;
+
+function hire(el){
+ let cost=100*Math.pow(1.5,worker)|0;
+ if(money>=cost){
+  money-=cost;
   worker++;
   play("up.mp3");
+  press(el);
  }
 }
-function train(){
- if(money>=2000){
-  money-=2000;
+
+function train(el){
+ let cost=2000*Math.pow(2,workerLv)|0;
+ if(money>=cost){
+  money-=cost;
   workerLv++;
   play("up.mp3");
+  press(el);
  }
 }
-function build(){
- if(money>=5000){
-  money-=5000;
+
+function build(el){
+ let cost=5000*Math.pow(2,factory)|0;
+ if(money>=cost){
+  money-=cost;
   factory++;
   play("up.mp3");
+  press(el);
  }
 }
 
-/* ===== 転生 ===== */
-function confirmPrestige(){
- play("click.mp3");
- if(money<100000000){
-  alert("1億円未満では転生できません");
- }else{
-  if(confirm("転生しますか？")){
-    soul++;
-    money=0; hats=0; price=100; worker=0; factory=0; workerLv=1;
-    update();
-  }
- }
-}
-
-/* ===== 廃業 ===== */
-function confirmReset(){
- play("click.mp3");
- if(confirm("廃業しますか？")){
-  location.reload();
- }
-}
-
-/* ===== 中断 ===== */
-function saveAndPause(){
- paused=true;
- bgm.pause();
-}
-
-/* ===== 再開 ===== */
-function resumeGame(){
- paused=false;
- bgm.play().catch(()=>{});
-}
-
-/* ===== ライフサイクル ===== */
-document.addEventListener("visibilitychange",()=>paused=document.hidden);
-window.addEventListener("blur",()=>paused=true);
-window.addEventListener("focus",()=>paused=false);
-
-/* 初期 */
+/* ===== 初期 ===== */
 update();
+
+/* ===== ズーム完全防止 ===== */
+document.addEventListener('touchmove', e => e.preventDefault(), { passive:false });
 
 </script>
 
