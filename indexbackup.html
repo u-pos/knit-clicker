@@ -397,7 +397,7 @@ function hire(el){
  }
 }
 function train(el){
- let c=ceil10(2000*Math.pow(2.2,workerLv-1));
+ let c=ceil10(2000*Math.pow(2.0,workerLv-1));
  if(money>=c && workerLv<MAX){
   money-=c;workerLv++;
   playSE(upSound);
@@ -415,7 +415,7 @@ function build(el){
  }
 }
 function getClickCost(){
- return Math.floor(100000*Math.pow(2.2,clickLevel));
+ return Math.floor(80000*Math.pow(2.1,clickLevel));
 }
 
 function upgradeClick(el){
