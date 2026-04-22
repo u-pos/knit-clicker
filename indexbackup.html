@@ -453,9 +453,24 @@ function confirmReset(){
 
 /* その他 */
 function prestige(){
- let g=Math.floor(Math.sqrt(money/1e8));
- soul+=g;
- money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
+ // ▼ 転生回数計算（上限50）
+ let g = Math.min(50, Math.floor(money / 1e8));
+
+ soul += g;
+
+ // ▼ リセット
+ money=0;
+ hats=0;
+ price=100;
+ worker=0;
+ factory=0;
+ workerLv=1;
+ upgradeCount=0;
+ autoBuffer=0;
+
+ // ▼ 転生ボーナス（1回につき+2）
+ clickPower = 1 + soul * 2;
+ clickLevel = soul * 2;
 }
 function saveAndPause(){
  saveGame();
