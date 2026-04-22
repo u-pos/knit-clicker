@@ -306,7 +306,7 @@ function hire(el){
   money-=c;worker++;
   upSound.cloneNode().play();
   pressEffect(el);
-  spawnPop("生産速度UP");  // ←追加
+  spawnPopAt(el,"生産速度UP");
  }
 }
 function train(el){
@@ -315,7 +315,7 @@ function train(el){
   money-=c;workerLv++;
   upSound.cloneNode().play();
   pressEffect(el);
-  spawnPop("生産効率UP");  // ←追加
+  spawnPopAt(el,"生産効率UP");  // ←追加
  }
 }
 function build(el){
@@ -324,7 +324,7 @@ function build(el){
   money-=c;factory++;
   upSound.cloneNode().play();
   pressEffect(el);
-  spawnPop("毎秒+1個UP");  // ←追加
+  spawnPopAt(el,"毎秒+1個UP");  // ←追加
  }
 }
 function getClickCost(){
@@ -339,7 +339,7 @@ function upgradeClick(el){
   clickLevel++;
   upSound.cloneNode().play();
   pressEffect(el);
-  spawnPop("手動クリック+1UP");  // ←追加
+  spawnPopAt(el,"手動クリック+1UP");  // ←追加
  }
  update();
 }
