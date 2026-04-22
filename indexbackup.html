@@ -160,7 +160,9 @@ document.addEventListener("click",()=>{
 /* ===== 状態 ===== */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
 let upgradeCount=0,autoBuffer=0,paused=false;
-
+let clickPower = 1;   // ←ここに移動
+let clickLevel = 0;
+ 
 /* ===== 保存 ===== */
 function saveGame(){
  localStorage.setItem(SAVE_KEY,JSON.stringify({
@@ -310,9 +312,6 @@ function build(el){
   pressEffect(el);
  }
 }
-let clickPower = 1;
-let clickLevel = 0;
-
 function getClickCost(){
  return Math.floor(100000*Math.pow(2.5,clickLevel));
 }
