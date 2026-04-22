@@ -479,14 +479,15 @@ function update(){
  trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
  factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
 
- // ★ここに入れる（最後）
  const btns = document.querySelectorAll(".btn");
 
- setBtnState(btns[0], money >= ceil10(100*Math.pow(1.5,worker)));
- setBtnState(btns[1], money >= ceil10(500*Math.pow(1.25,upgradeCount)));
- setBtnState(btns[2], money >= ceil10(2000*Math.pow(2.2,workerLv-1)));
- setBtnState(btns[3], money >= ceil10(5000*Math.pow(2,factory)));
- setBtnState(btns[4], money >= getClickCost());
+ if(btns.length === 5){   // ←これが重要
+  setBtnState(btns[0], money >= ceil10(100*Math.pow(1.5,worker)));
+  setBtnState(btns[1], money >= ceil10(500*Math.pow(1.25,upgradeCount)));
+  setBtnState(btns[2], money >= ceil10(2000*Math.pow(2.2,workerLv-1)));
+  setBtnState(btns[3], money >= ceil10(5000*Math.pow(2,factory)));
+  setBtnState(btns[4], money >= getClickCost());
+ }
 }
 
 update();
