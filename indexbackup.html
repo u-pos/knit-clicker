@@ -233,6 +233,18 @@ function spawnPop(val){
  document.body.appendChild(p);
  setTimeout(()=>p.remove(),800);
 }
+ function spawnPopAt(el,text){
+ const r=el.getBoundingClientRect();
+ const p=document.createElement("div");
+ p.className="pop";
+ p.innerText=text;
+
+ p.style.left=(r.left+r.width/2)+"px";
+ p.style.top=(r.top)+"px";
+
+ document.body.appendChild(p);
+ setTimeout(()=>p.remove(),800);
+}
 function hatEffect(val){
  spawnPop(val);
  hatBtn.style.transform="scale(0.9)";
