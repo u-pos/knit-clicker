@@ -469,7 +469,7 @@ function resumeGame(){
 function resetGame(){
  localStorage.removeItem(SAVE_KEY);
 
- // 状態も強制リセット（これが重要）
+ // 基本ステータス
  money=0;
  hats=0;
  price=100;
@@ -480,9 +480,11 @@ function resetGame(){
  upgradeCount=0;
  autoBuffer=0;
 
- update(); // ←画面即反映
+ // ▼これを追加（今回のバグ原因）
+ clickPower = 1;
+ clickLevel = 0;
 
- // 念のためリロード
+ update();
  location.reload();
 }
 const volumeSlider = document.getElementById("volumeSlider");
