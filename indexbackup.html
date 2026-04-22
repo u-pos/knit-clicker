@@ -71,7 +71,27 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
  pointer-events:none;
  animation:popFast 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+.popBtn{
+ animation:popFastBtn 1.2s ease-out forwards;
+}
 
+@keyframes popFastBtn{
+ 0%{
+  opacity:0;
+  transform:translate(-50%,-10%) scale(0.9);
+ }
+ 20%{
+  opacity:1;
+  transform:translate(-50%,-60%) scale(1.1);
+ }
+ 80%{
+  opacity:1;
+ }
+ 100%{
+  opacity:0;
+  transform:translate(-50%,-90%);
+ }
+}
 @keyframes popFast{
  0%{
   opacity:0;
@@ -285,21 +305,21 @@ const factoryCost=document.getElementById("factoryCost");
 /* ===== エフェクト ===== */
 
 function spawnPopAt(el,text){
- const r=el.getBoundingClientRect();
- const game=document.getElementById("game");
- const gr=game.getBoundingClientRect();
+ const r = el.getBoundingClientRect();
+ const game = document.getElementById("game");
+ const gr = game.getBoundingClientRect();
 
- const p=document.createElement("div");
- p.className="pop";
- p.innerText=text;
+ const p = document.createElement("div");
+ p.className = "pop popBtn";  // ←ここ追加
+ p.innerText = text;
 
- p.style.left=(r.left - gr.left + r.width/2)+"px";
- p.style.top=(r.top - gr.top)+"px";
- p.style.transform="translate(-50%,-100%)";
+ p.style.left = (r.left - gr.left + r.width/2) + "px";
+ p.style.top  = (r.top - gr.top) + "px";
+ p.style.transform = "translate(-50%,-100%)";
 
  game.appendChild(p);
 
- setTimeout(()=>p.remove(),800);
+ setTimeout(()=>p.remove(),1000); // ←ここも調整OK
 }
 function hatEffect(val){
  spawnPop(val);
