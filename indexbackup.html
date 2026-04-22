@@ -92,11 +92,32 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
   🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
 </div>
 <div class="bottom">
-  <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
-  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
-  <div class="btn" onclick="train(this)"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
-  <div class="btn" onclick="build(this)"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
-  <div class="btn" onclick="upgradeClick(this)"><img src="btn_click3.png"><div class="price" id="clickCost"></div>
+
+  <div class="btn" onclick="hire(this)">
+    <img src="btn_worker3.png">
+    <div class="price" id="workerCost"></div>
+  </div>
+
+  <div class="btn" onclick="upgrade(this)">
+    <img src="btn_upgrade3.png">
+    <div class="price" id="priceCost"></div>
+  </div>
+
+  <div class="btn" onclick="train(this)">
+    <img src="btn_training3.png">
+    <div class="price" id="trainCost"></div>
+  </div>
+
+  <div class="btn" onclick="build(this)">
+    <img src="btn_factory3.png">
+    <div class="price" id="factoryCost"></div>
+  </div>
+
+  <div class="btn" onclick="upgradeClick(this)">
+    <img src="btn_click3.png">
+    <div class="price" id="clickCost"></div>
+  </div>
+
 </div>
 </div>
 
@@ -128,7 +149,7 @@ document.addEventListener("click",()=>{
 
 /* ===== 状態 ===== */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
-let upgradeCount=0,autoBuffer=0,paused=true;
+let upgradeCount=0,autoBuffer=0,paused=false;
 
 /* ===== 保存 ===== */
 function saveGame(){
@@ -215,7 +236,7 @@ hatBtn.onclick=()=>{
  if(paused)return;
  hats += clickPower;
  clickSound.cloneNode().play();
- hatEffect(clickPower);   // ←これに変更
+ hatEffect(clickPower);
  update();
 };
 
