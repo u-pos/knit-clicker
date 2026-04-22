@@ -164,7 +164,7 @@ let upgradeCount=0,autoBuffer=0,paused=false;
 /* ===== 保存 ===== */
 function saveGame(){
  localStorage.setItem(SAVE_KEY,JSON.stringify({
-  money,hats,price,worker,factory,workerLv,soul,upgradeCount
+  money,hats,price,worker,factory,workerLv,soul,upgradeCount,clickPower,clickLevel   // ←追加
  }));
 }
 function loadGame(){
@@ -179,7 +179,8 @@ function loadGame(){
  workerLv=d.workerLv||1;
  soul=d.soul||0;
  upgradeCount=d.upgradeCount||0;
-
+ clickPower = d.clickPower || 1;
+ clickLevel = d.clickLevel || 0;
  autoBuffer=0;
  paused=false;
 }
