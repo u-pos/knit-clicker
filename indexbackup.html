@@ -1,3 +1,4 @@
+<!-- 変更点だけじゃなく“完全版” -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -9,69 +10,43 @@
 body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:'DotGothic16';}
 #game{width:1280px;height:720px;position:relative;}
 .bg{position:absolute;width:100%;height:100%;}
-#volumeBox{
- position:absolute;
- top:130px;  /* 納品ボタンの下あたりに微調整可 */
- right:50px;
- color:#fff;
- font-size:20px;
-}
 
-#volumeSlider{
- width:150px;
-}
+/* UI */
 .panel{position:absolute;top:20px;left:20px;width:340px;padding:18px;background:rgba(0,0,0,0.85);border-radius:12px;}
 .panel-text{color:#ffd700;font-size:26px;line-height:2.0;}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
-.ctrl{background:#222;color:#fff;padding:10px;text-align:center;cursor:pointer;transition:0.1s;}
-.ctrl:active{background:#a00000;transform:scale(0.95);}
-
-.hat{position:absolute;top:150px;left:540px;width:360px;cursor:pointer;transition:0.1s;}
+.hat{position:absolute;top:150px;left:540px;width:360px;cursor:pointer;}
 
 .deliver{position:absolute;top:20px;right:40px;width:260px;cursor:pointer;}
 .deliver img{width:100%;}
 
+/* 下ボタン */
 .bottom{position:absolute;bottom:0;width:100%;height:200px;}
-.btn{
- position:absolute;
- width:280px;
- height:200px;
- cursor:pointer;
- display:flex;
- align-items:flex-end;
- justify-content:center;
- overflow:hidden;
-}
-
-.btn img{
- width:100%;
- height:100%;
- object-fit:contain; /* ←これが重要 */
- pointer-events:none;
-}
+.btn{position:absolute;width:280px;height:200px;cursor:pointer;}
 .btn:nth-child(1){left:40px;}
 .btn:nth-child(2){left:360px;}
 .btn:nth-child(3){left:680px;}
 .btn:nth-child(4){left:1000px;}
 
-.price{
- position:absolute;
- bottom:10px;
- left:50%;
- transform:translateX(-50%);
- color:#fff;
- font-size:25px;
-}
+.btn img{width:100%;height:100%;object-fit:contain;}
 
+.price{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);color:#fff;font-size:28px;}
+
+/* ★ 自身強化ボタン */
+.click-up{
+ position:absolute;
+ bottom:210px;
+ right:40px;
+ width:280px;
+ height:120px;
+ cursor:pointer;
+}
+.click-up img{width:100%;height:100%;object-fit:contain;}
+
+/* エフェクト */
 .pop{position:absolute;color:#fff;font-size:28px;animation:pop 0.8s forwards;}
 @keyframes pop{100%{opacity:0;transform:translateY(-60px);}}
 
-.modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-background:#000;padding:20px;border:2px solid #fff;text-align:center;display:none;z-index:999;}
-.modal.active{display:block;}
-#modalText{color:#fff;font-size:24px;}
-.modal button{margin:10px;padding:10px;}
 </style>
 </head>
 
@@ -81,114 +56,55 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
 <img src="bg.jpg" class="bg">
 
 <div class="panel">
-  <div class="panel-text">
-    <div id="money"></div>
-    <div>ニット帽：<span id="hat"></span>個</div>
-    <div>商品単価：<span id="price"></span>円</div>
-    <div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
-    <div>工場数：<span id="factory"></span>棟</div>
-    <div>転生：<span id="soul"></span>回</div>
-  </div>
-
-  <div class="grid">
-    <div class="ctrl" onclick="confirmPrestige()">転生する</div>
-    <div class="ctrl" onclick="saveAndPause()">保存して終了</div>
-    <div class="ctrl" onclick="resumeGame()">再開する</div>
-    <div class="ctrl" onclick="confirmReset()">廃業する</div>
-  </div>
+<div class="panel-text">
+<div id="money"></div>
+<div>ニット帽：<span id="hat"></span>個</div>
+<div>商品単価：<span id="price"></span>円</div>
+<div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
+<div>工場数：<span id="factory"></span>棟</div>
+</div>
 </div>
 
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
 <div class="deliver" onclick="sellAll(this)">
-  <img src="btn_deliver2.png">
-</div>
-<div id="volumeBox">
-  🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
-</div>
-<div class="bottom">
-  <div class="btn" onclick="hire(this)"><img src="btn_worker3.png"><div class="price" id="workerCost"></div></div>
-  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade3.png"><div class="price" id="priceCost"></div></div>
-  <div class="btn" onclick="train(this)"><img src="btn_training3.png"><div class="price" id="trainCost"></div></div>
-  <div class="btn" onclick="build(this)"><img src="btn_factory3.png"><div class="price" id="factoryCost"></div></div>
+<img src="btn_deliver3.png">
 </div>
 
-<div class="modal" id="modal">
-  <div id="modalText"></div>
-  <div id="modalButtons"></div>
+<!-- ★ 自身強化 -->
+<div class="click-up" onclick="upgradeClick(this)">
+<img src="btn_click3.png">
+<div class="price" id="clickCost"></div>
+</div>
+
+<div class="bottom">
+<div class="btn" onclick="hire(this)"><img src="btn_worker3.png"><div class="price" id="workerCost"></div></div>
+<div class="btn" onclick="upgrade(this)"><img src="btn_upgrade3.png"><div class="price" id="priceCost"></div></div>
+<div class="btn" onclick="train(this)"><img src="btn_training3.png"><div class="price" id="trainCost"></div></div>
+<div class="btn" onclick="build(this)"><img src="btn_factory3.png"><div class="price" id="factoryCost"></div></div>
 </div>
 
 </div>
 
 <script>
-const SAVE_KEY="knitSave";
 const MAX=99;
 
-/* ===== 音 ===== */
-const clickSound=new Audio("click.mp3");
-const upSound=new Audio("up.mp3");
-const moneySound=new Audio("money.mp3");
-const bgm=new Audio("bgm.mp3");
-bgm.loop=true;bgm.volume=0.3;
-
-let bgmStarted=false;
-document.addEventListener("click",()=>{
- if(!bgmStarted){
-  bgm.play().catch(()=>{});
-  bgmStarted=true;
- }
-},{once:true});
-
 /* ===== 状態 ===== */
-let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
-let upgradeCount=0,autoBuffer=0,paused=true;
-
-/* ===== 保存 ===== */
-function saveGame(){
- localStorage.setItem(SAVE_KEY,JSON.stringify({
-  money,hats,price,worker,factory,workerLv,soul,upgradeCount
- }));
-}
-function loadGame(){
- const d=JSON.parse(localStorage.getItem(SAVE_KEY));
- if(!d)return;
-
- money=d.money||0;
- hats=d.hats||0;
- price=d.price||100;
- worker=d.worker||0;
- factory=d.factory||0;
- workerLv=d.workerLv||1;
- soul=d.soul||0;
- upgradeCount=d.upgradeCount||0;
-
- autoBuffer=0;
-
- paused=true; // ←これを追加（復帰時は必ず停止）
-}
-loadGame();
-
-/* ページ閉じる時だけ保存（進行なし） */
-window.addEventListener("beforeunload",saveGame);
+let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1;
+let upgradeCount=0;
+let clickPower=1;
+let clickLevel=0;
 
 /* ===== 表示 ===== */
 function formatMoney(n){
  n=Math.floor(n);
- if(n>=1e16)return(Math.floor(n/1e14)/100)+"京円";
- if(n>=1e12)return(Math.floor(n/1e10)/100)+"兆円";
- if(n>=1e8)return(Math.floor(n/1e6)/100)+"億円";
- if(n>=1e4)return(Math.floor(n/100)/100)+"万円";
- return n+"円";
-}
-function formatCost(n){
- n=Math.floor(n);
- if(n>=1e8)return(Math.floor(n/1e6)/100)+"億円";
- if(n>=1e4)return(Math.floor(n/100)/100)+"万円";
+ if(n>=1e8)return(n/1e8).toFixed(2)+"億円";
+ if(n>=1e4)return(n/1e4).toFixed(2)+"万円";
  return n+"円";
 }
 function ceil10(n){return Math.ceil(n/10)*10;}
 
-/* DOM */
+/* ===== DOM ===== */
 const hatBtn=document.getElementById("hatBtn");
 const moneyEl=document.getElementById("money");
 const hatEl=document.getElementById("hat");
@@ -196,177 +112,85 @@ const priceEl=document.getElementById("price");
 const workerEl=document.getElementById("worker");
 const workerLvEl=document.getElementById("workerLv");
 const factoryEl=document.getElementById("factory");
-const soulEl=document.getElementById("soul");
-const priceCost=document.getElementById("priceCost");
-const workerCost=document.getElementById("workerCost");
-const trainCost=document.getElementById("trainCost");
-const factoryCost=document.getElementById("factoryCost");
 
 /* ===== エフェクト ===== */
 function spawnPop(val){
- const r=hatBtn.getBoundingClientRect();
  const p=document.createElement("div");
  p.className="pop";
  p.innerText="+"+val;
- p.style.left=(r.left+r.width*0.7)+"px";
- p.style.top=(r.top+r.height*0.1)+"px";
+ p.style.left="600px";
+ p.style.top="200px";
  document.body.appendChild(p);
  setTimeout(()=>p.remove(),800);
-}
-function hatEffect(val){
- spawnPop(val);
- hatBtn.style.transform="scale(0.9)";
- setTimeout(()=>hatBtn.style.transform="scale(1)",80);
-}
-function pressEffect(el){
- el.style.transform="scale(0.9)";
- setTimeout(()=>el.style.transform="scale(1)",80);
 }
 
 /* ===== クリック ===== */
 hatBtn.onclick=()=>{
- if(paused)return;
- hats++;
- clickSound.cloneNode().play();
- hatEffect(1);
+ hats+=clickPower;
+ spawnPop(clickPower);
  update();
 };
 
-/* 自動（起動中のみ） */
+/* ===== 自動 ===== */
 setInterval(()=>{
- if(paused)return;
  let g=(worker*0.05*workerLv)+(factory*1.0);
  hats+=g;
- autoBuffer+=g;
-
- let t=Math.floor(autoBuffer);
- if(t>=1){
-  autoBuffer-=t;
-  hatEffect(t);
- }
  update();
 },500);
 
-/* 納品 */
-function sellAll(el){
- if(paused)return;
+/* ===== 納品 ===== */
+function sellAll(){
  if(hats>0){
   money+=Math.floor(hats*price);
   hats=0;
-  moneySound.cloneNode().play();
-  pressEffect(el);
  }
  update();
 }
 
-/* 強化 */
+/* ===== 自身強化（クリック強化） ===== */
+function getClickCost(){
+ return Math.floor(10000*Math.pow(2.2,clickLevel));
+}
+
+function upgradeClick(el){
+ let cost=getClickCost();
+
+ if(money>=cost){
+  money-=cost;
+  clickPower++;
+  clickLevel++;
+  spawnPop("クリック+"+clickPower);
+ }
+ update();
+}
+
+/* ===== 他 ===== */
 function upgrade(el){
  let cost=ceil10(500*Math.pow(1.25,upgradeCount));
  if(money>=cost){
   money-=cost;price+=10;upgradeCount++;
-  upSound.cloneNode().play();
-  pressEffect(el);
  }
 }
 function hire(el){
  let c=ceil10(100*Math.pow(1.5,worker));
  if(money>=c && worker<MAX){
   money-=c;worker++;
-  upSound.cloneNode().play();
-  pressEffect(el);
  }
 }
 function train(el){
  let c=ceil10(2000*Math.pow(2.2,workerLv-1));
  if(money>=c && workerLv<MAX){
   money-=c;workerLv++;
-  upSound.cloneNode().play();
-  pressEffect(el);
  }
 }
 function build(el){
  let c=ceil10(5000*Math.pow(2,factory));
  if(money>=c && factory<MAX){
   money-=c;factory++;
-  upSound.cloneNode().play();
-  pressEffect(el);
  }
 }
 
-/* ===== モーダル ===== */
-function openModal(text,buttons){
- modal.classList.add("active");
- modalText.innerText=text;
- modalButtons.innerHTML=buttons;
-}
-function closeModal(){modal.classList.remove("active");}
-
-function confirmPrestige(){
- if(money<100000000){
-  openModal("1億円以下では転生できません","<button onclick='closeModal()'>OK</button>");
- }else{
-  openModal("本当に転生しますか？",
-   "<button onclick='prestige();closeModal()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
- }
-}
-function confirmReset(){
- openModal("本当に廃業しますか？",
-  "<button onclick='resetGame()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
-}
-
-/* その他 */
-function prestige(){
- let g=Math.floor(Math.sqrt(money/1e8));
- soul+=g;
- money=0;hats=0;price=100;worker=0;factory=0;workerLv=1;upgradeCount=0;
-}
-function saveAndPause(){
- saveGame();
- paused=true;
- bgm.pause(); // ←追加
-}
-function resumeGame(){
- paused=false;
- bgm.play().catch(()=>{}); // ←既存 or なければ追加
-}
-function resetGame(){
- localStorage.removeItem(SAVE_KEY);
-
- // 状態も強制リセット（これが重要）
- money=0;
- hats=0;
- price=100;
- worker=0;
- factory=0;
- workerLv=1;
- soul=0;
- upgradeCount=0;
- autoBuffer=0;
-
- update(); // ←画面即反映
-
- // 念のためリロード
- location.reload();
-}
-const volumeSlider = document.getElementById("volumeSlider");
-
-function applyVolume(v){
- const vol = v/100;
-
- bgm.volume = vol;
-
- clickSound.volume = vol;
- upSound.volume = vol;
- moneySound.volume = vol;
-}
-
-volumeSlider.addEventListener("input",()=>{
- applyVolume(volumeSlider.value);
-});
-
-/* 初期適用 */
-applyVolume(volumeSlider.value);
-/* 更新 */
+/* ===== 更新 ===== */
 function update(){
  moneyEl.innerText="所持金："+formatMoney(money);
  hatEl.innerText=Math.floor(hats);
@@ -374,12 +198,13 @@ function update(){
  workerEl.innerText=worker;
  workerLvEl.innerText=workerLv;
  factoryEl.innerText=factory;
- soulEl.innerText=soul;
 
- priceCost.innerText=formatCost(ceil10(500*Math.pow(1.25,upgradeCount)));
- workerCost.innerText=formatCost(ceil10(100*Math.pow(1.5,worker)));
- trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
- factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
+ document.getElementById("priceCost").innerText=ceil10(500*Math.pow(1.25,upgradeCount))+"円";
+ document.getElementById("workerCost").innerText=ceil10(100*Math.pow(1.5,worker))+"円";
+ document.getElementById("trainCost").innerText=ceil10(2000*Math.pow(2.2,workerLv-1))+"円";
+ document.getElementById("factoryCost").innerText=ceil10(5000*Math.pow(2,factory))+"円";
+
+ document.getElementById("clickCost").innerText=getClickCost()+"円";
 }
 
 update();
