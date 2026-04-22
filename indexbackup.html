@@ -39,6 +39,10 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
 .btn:nth-child(3){left:490px;}
 .btn:nth-child(4){left:730px;}
 .btn:nth-child(5){left:970px;}
+.btn.disabled{
+ filter:brightness(0.5);
+ pointer-events:none;
+}
 .btn img{
  position:absolute;
  bottom:0;
@@ -67,7 +71,32 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
  z-index:9999;   /* ←これ追加 */
  pointer-events:none;
 }
-@keyframes pop{100%{opacity:0;transform:translateY(-60px);}}
+.pop{
+ position:absolute;
+ color:#fff;
+ font-size:24px;
+ z-index:9999;
+ pointer-events:none;
+ opacity:0;
+ animation:popFade 1s ease-out forwards;
+}
+
+@keyframes popFade{
+ 0%{
+  opacity:0;
+  transform:translate(-50%,-20%);
+ }
+ 20%{
+  opacity:1;
+ }
+ 80%{
+  opacity:1;
+ }
+ 100%{
+  opacity:0;
+  transform:translate(-50%,-40%);
+ }
+}
 
 .modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
 background:#000;padding:20px;border:2px solid #fff;text-align:center;display:none;z-index:999;}
@@ -443,11 +472,21 @@ function update(){
  workerLvEl.innerText=workerLv;
  factoryEl.innerText=factory;
  soulEl.innerText=soul;
+
  document.getElementById("clickCost").innerText = formatCost(getClickCost());
  priceCost.innerText=formatCost(ceil10(500*Math.pow(1.25,upgradeCount)));
  workerCost.innerText=formatCost(ceil10(100*Math.pow(1.5,worker)));
  trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
  factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
+
+ // ★ここに入れる（最後）
+ const btns = document.querySelectorAll(".btn");
+
+ setBtnState(btns[0], money >= ceil10(100*Math.pow(1.5,worker)));
+ setBtnState(btns[1], money >= ceil10(500*Math.pow(1.25,upgradeCount)));
+ setBtnState(btns[2], money >= ceil10(2000*Math.pow(2.2,workerLv-1)));
+ setBtnState(btns[3], money >= ceil10(5000*Math.pow(2,factory)));
+ setBtnState(btns[4], money >= getClickCost());
 }
 
 update();
