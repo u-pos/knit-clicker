@@ -240,16 +240,21 @@ function spawnPop(val){
  document.body.appendChild(p);
  setTimeout(()=>p.remove(),800);
 }
- function spawnPopAt(el,text){
+function spawnPopAt(el,text){
  const r=el.getBoundingClientRect();
+ const game=document.getElementById("game");
+ const gr=game.getBoundingClientRect();
+
  const p=document.createElement("div");
  p.className="pop";
  p.innerText=text;
 
- p.style.left=(r.left+r.width/2)+"px";
- p.style.top=(r.top)+"px";
+ p.style.left=(r.left - gr.left + r.width/2)+"px";
+ p.style.top=(r.top - gr.top)+"px";
+ p.style.transform="translate(-50%,-100%)";
 
- document.body.appendChild(p);
+ game.appendChild(p);
+
  setTimeout(()=>p.remove(),800);
 }
 function hatEffect(val){
