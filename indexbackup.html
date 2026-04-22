@@ -349,7 +349,7 @@ hatBtn.onclick=()=>{
 /* 自動（起動中のみ） */
 setInterval(()=>{
  if(paused)return;
- let g=(worker*0.05*workerLv)+(factory*1.0);
+ let g=(worker*0.12*Math.pow(workerLv,1.3))+(factory*1.0);
  hats+=g;
  autoBuffer+=g;
 
@@ -415,7 +415,7 @@ function build(el){
  }
 }
 function getClickCost(){
- return Math.floor(100000*Math.pow(2.5,clickLevel));
+ return Math.floor(100000*Math.pow(2.2,clickLevel));
 }
 
 function upgradeClick(el){
