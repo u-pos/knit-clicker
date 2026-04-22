@@ -59,7 +59,14 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
  border-radius:6px;         /* ←ちょい高級感 */
 }
 
-.pop{position:absolute;color:#fff;font-size:28px;animation:pop 0.8s forwards;}
+.pop{
+ position:absolute;
+ color:#fff;
+ font-size:28px;
+ animation:pop 0.8s forwards;
+ z-index:9999;   /* ←これ追加 */
+ pointer-events:none;
+}
 @keyframes pop{100%{opacity:0;transform:translateY(-60px);}}
 
 .modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
