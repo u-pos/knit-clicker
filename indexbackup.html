@@ -343,9 +343,8 @@ function upgrade(el){
   upSound.cloneNode().play();
   pressEffect(el);
 
-  spawnPopAt(el,"単価UP");  // ←これ追加
+  spawnPopAt(el,"単価UP");
  }
-}
 }
 function hire(el){
  let c=ceil10(100*Math.pow(1.5,worker));
