@@ -460,7 +460,13 @@ function applyVolume(v){
 volumeSlider.addEventListener("input",()=>{
  applyVolume(volumeSlider.value);
 });
-
+function setBtnState(el, condition){
+ if(condition){
+  el.classList.remove("disabled");
+ }else{
+  el.classList.add("disabled");
+ }
+}
 /* 初期適用 */
 applyVolume(volumeSlider.value);
 /* 更新 */
