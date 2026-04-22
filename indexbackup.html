@@ -283,16 +283,7 @@ const trainCost=document.getElementById("trainCost");
 const factoryCost=document.getElementById("factoryCost");
 
 /* ===== エフェクト ===== */
-function spawnPop(val){
- const r=hatBtn.getBoundingClientRect();
- const p=document.createElement("div");
- p.className="pop";
- p.innerText="+"+val;
- p.style.left=(r.left+r.width*0.7)+"px";
- p.style.top=(r.top+r.height*0.1)+"px";
- document.body.appendChild(p);
- setTimeout(()=>p.remove(),800);
-}
+
 function spawnPopAt(el,text){
  const r=el.getBoundingClientRect();
  const game=document.getElementById("game");
