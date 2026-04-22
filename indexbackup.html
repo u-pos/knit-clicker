@@ -1,4 +1,3 @@
-<!-- 重要部分だけでなく全部置き換え -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -10,6 +9,22 @@
 body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:'DotGothic16';}
 #game{width:1280px;height:720px;position:relative;}
 .bg{position:absolute;width:100%;height:100%;}
+
+/* 左UI復活 */
+.panel{
+ position:absolute;
+ top:20px;
+ left:20px;
+ width:340px;
+ padding:18px;
+ background:rgba(0,0,0,0.85);
+ border-radius:12px;
+}
+.panel-text{
+ color:#ffd700;
+ font-size:24px;
+ line-height:1.8;
+}
 
 /* 帽子 */
 .hat{
@@ -72,6 +87,17 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
 <div id="game">
 <img src="bg.jpg" class="bg">
 
+<!-- ★復活 -->
+<div class="panel">
+<div class="panel-text">
+<div id="money"></div>
+<div>ニット帽：<span id="hat"></span>個</div>
+<div>商品単価：<span id="price"></span>円</div>
+<div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
+<div>工場数：<span id="factory"></span>棟</div>
+</div>
+</div>
+
 <img src="knit-hat-v2.png" class="hat" id="hatBtn">
 
 <div class="bottom">
@@ -86,11 +112,11 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
 
 <script>
 
-/* ===== 状態 ===== */
+/* 状態 */
 let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1;
-let clickPower=1,clickLevel=0;
+let clickPower=1,clickLevel=0,upgradeCount=0;
 
-/* ===== 金額フォーマット（修正済み） */
+/* 金額フォーマット */
 function formatMoney(n){
  n=Math.floor(n);
  if(n>=1e12) return (Math.floor(n/1e10)/100)+"兆円";
@@ -99,42 +125,57 @@ function formatMoney(n){
  return n+"円";
 }
 
-/* ===== 帽子クリック ===== */
+/* 帽子 */
 const hatBtn=document.getElementById("hatBtn");
 
 hatBtn.onclick=()=>{
  hats+=clickPower;
 
- // ★ 拡大縮小
  hatBtn.style.transform="scale(0.9)";
  setTimeout(()=>hatBtn.style.transform="scale(1)",80);
 
  spawnPop(clickPower);
-
  update();
 };
 
-/* ===== ポップ位置修正 ===== */
+/* ポップ */
 function spawnPop(val){
- const rect=hatBtn.getBoundingClientRect();
+ const r=hatBtn.getBoundingClientRect();
 
  const p=document.createElement("div");
  p.className="pop";
  p.innerText="+"+val;
 
- p.style.left=(rect.right - 40)+"px";
- p.style.top=(rect.top + 10)+"px";
+ p.style.left=(r.right-40)+"px";
+ p.style.top=(r.top+10)+"px";
 
  document.body.appendChild(p);
  setTimeout(()=>p.remove(),800);
 }
 
-/* ===== コスト ===== */
+/* 自動 */
+setInterval(()=>{
+ hats+=(worker*0.05*workerLv)+(factory*1.0);
+ update();
+},500);
+
+/* 納品 */
+function sellAll(){
+ if(hats>0){
+  money+=Math.floor(hats*price);
+  hats=0;
+ }
+ update();
+}
+
+/* コスト */
+function ceil10(n){return Math.ceil(n/10)*10;}
+
 function getClickCost(){
  return Math.floor(10000*Math.pow(2.2,clickLevel));
 }
 
-/* ===== 強化 ===== */
+/* 強化 */
 function upgradeClick(el){
  let cost=getClickCost();
  if(money>=cost){
@@ -145,13 +186,52 @@ function upgradeClick(el){
  update();
 }
 
-function hire(){}
-function upgrade(){}
-function train(){}
-function build(){}
+function upgrade(){
+ let cost=ceil10(500*Math.pow(1.25,upgradeCount));
+ if(money>=cost){
+  money-=cost;
+  price+=10;
+  upgradeCount++;
+ }
+}
 
-/* ===== 更新 ===== */
+function hire(){
+ let c=ceil10(100*Math.pow(1.5,worker));
+ if(money>=c){
+  money-=c;
+  worker++;
+ }
+}
+
+function train(){
+ let c=ceil10(2000*Math.pow(2.2,workerLv-1));
+ if(money>=c){
+  money-=c;
+  workerLv++;
+ }
+}
+
+function build(){
+ let c=ceil10(5000*Math.pow(2,factory));
+ if(money>=c){
+  money-=c;
+  factory++;
+ }
+}
+
+/* 更新 */
 function update(){
+ document.getElementById("money").innerText="所持金："+formatMoney(money);
+ document.getElementById("hat").innerText=Math.floor(hats);
+ document.getElementById("price").innerText=price;
+ document.getElementById("worker").innerText=worker;
+ document.getElementById("workerLv").innerText=workerLv;
+ document.getElementById("factory").innerText=factory;
+
+ document.getElementById("priceCost").innerText=formatMoney(ceil10(500*Math.pow(1.25,upgradeCount)));
+ document.getElementById("workerCost").innerText=formatMoney(ceil10(100*Math.pow(1.5,worker)));
+ document.getElementById("trainCost").innerText=formatMoney(ceil10(2000*Math.pow(2.2,workerLv-1)));
+ document.getElementById("factoryCost").innerText=formatMoney(ceil10(5000*Math.pow(2,factory)));
  document.getElementById("clickCost").innerText=formatMoney(getClickCost());
 }
 
