@@ -210,7 +210,13 @@ const upSound=new Audio("up.mp3");
 const moneySound=new Audio("money.mp3");
 const bgm=new Audio("bgm.mp3");
 bgm.loop=true;bgm.volume=0.3;
+let masterVolume = 0.3;
 
+function playSE(base){
+ const s = base.cloneNode();
+ s.volume = masterVolume;
+ s.play();
+}
 let bgmStarted=false;
 document.addEventListener("click",()=>{
  if(!bgmStarted){
@@ -335,7 +341,7 @@ function pressEffect(el){
 hatBtn.onclick=()=>{
  if(paused)return;
  hats += clickPower;
- clickSound.cloneNode().play();
+ playSE(clickSound);
  hatEffect(clickPower);
  update();
 };
@@ -361,7 +367,7 @@ function sellAll(el){
  if(hats>0){
   money+=Math.floor(hats*price);
   hats=0;
-  moneySound.cloneNode().play();
+  playSE(moneySound);
   pressEffect(el);
  }
  update();
@@ -375,7 +381,7 @@ function upgrade(el){
   price+=10;
   upgradeCount++;
 
-  upSound.cloneNode().play();
+  playSE(upSound);
   pressEffect(el);
 
   spawnPopAt(el,"単価UP");
@@ -385,7 +391,7 @@ function hire(el){
  let c=ceil10(100*Math.pow(1.5,worker));
  if(money>=c && worker<MAX){
   money-=c;worker++;
-  upSound.cloneNode().play();
+  playSE(upSound);
   pressEffect(el);
   spawnPopAt(el,"生産速度UP");
  }
@@ -394,7 +400,7 @@ function train(el){
  let c=ceil10(2000*Math.pow(2.2,workerLv-1));
  if(money>=c && workerLv<MAX){
   money-=c;workerLv++;
-  upSound.cloneNode().play();
+  playSE(upSound);
   pressEffect(el);
   spawnPopAt(el,"生産効率UP");  // ←追加
  }
@@ -403,7 +409,7 @@ function build(el){
  let c=ceil10(5000*Math.pow(2,factory));
  if(money>=c && factory<MAX){
   money-=c;factory++;
-  upSound.cloneNode().play();
+  playSE(upSound);
   pressEffect(el);
   spawnPopAt(el,"毎秒+1個UP");  // ←追加
  }
@@ -418,7 +424,7 @@ function upgradeClick(el){
   money -= cost;
   clickPower++;
   clickLevel++;
-  upSound.cloneNode().play();
+  playSE(upSound);
   pressEffect(el);
   spawnPopAt(el,"手動クリック+1UP");  // ←追加
  }
@@ -482,13 +488,8 @@ function resetGame(){
 const volumeSlider = document.getElementById("volumeSlider");
 
 function applyVolume(v){
- const vol = v/100;
-
- bgm.volume = vol;
-
- clickSound.volume = vol;
- upSound.volume = vol;
- moneySound.volume = vol;
+ masterVolume = v/100;
+ bgm.volume = masterVolume;
 }
 
 volumeSlider.addEventListener("input",()=>{
