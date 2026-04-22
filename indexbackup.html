@@ -33,14 +33,36 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
 .deliver img{width:100%;}
 
 .bottom{position:absolute;bottom:0;width:100%;height:200px;}
-.btn{position:absolute;width:280px;height:200px;cursor:pointer;}
+.btn{
+ position:absolute;
+ width:280px;
+ height:200px;
+ cursor:pointer;
+ display:flex;
+ align-items:flex-end;
+ justify-content:center;
+ overflow:hidden;
+}
+
+.btn img{
+ width:100%;
+ height:100%;
+ object-fit:contain; /* ←これが重要 */
+ pointer-events:none;
+}
 .btn:nth-child(1){left:40px;}
 .btn:nth-child(2){left:360px;}
 .btn:nth-child(3){left:680px;}
 .btn:nth-child(4){left:1000px;}
-.btn img{position:absolute;bottom:0;width:100%;}
 
-.price{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);color:#fff;font-size:24px;}
+.price{
+ position:absolute;
+ bottom:10px;
+ left:50%;
+ transform:translateX(-50%);
+ color:#fff;
+ font-size:28px;
+}
 
 .pop{position:absolute;color:#fff;font-size:28px;animation:pop 0.8s forwards;}
 @keyframes pop{100%{opacity:0;transform:translateY(-60px);}}
@@ -85,10 +107,10 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
   🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
 </div>
 <div class="bottom">
-  <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
-  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
-  <div class="btn" onclick="train(this)"><img src="btn_training2.png"><div class="price" id="trainCost"></div></div>
-  <div class="btn" onclick="build(this)"><img src="btn_factory2.png"><div class="price" id="factoryCost"></div></div>
+  <div class="btn" onclick="hire(this)"><img src="btn_worker3.png"><div class="price" id="workerCost"></div></div>
+  <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade3.png"><div class="price" id="priceCost"></div></div>
+  <div class="btn" onclick="train(this)"><img src="btn_training3.png"><div class="price" id="trainCost"></div></div>
+  <div class="btn" onclick="build(this)"><img src="btn_factory3.png"><div class="price" id="factoryCost"></div></div>
 </div>
 
 <div class="modal" id="modal">
@@ -250,7 +272,6 @@ function hire(el){
  let c=ceil10(100*Math.pow(1.5,worker));
  if(money>=c && worker<MAX){
   money-=c;worker++;
-  spawnBuff("生産速度UP"); // ←追加
   upSound.cloneNode().play();
   pressEffect(el);
  }
@@ -259,7 +280,6 @@ function train(el){
  let c=ceil10(2000*Math.pow(2.2,workerLv-1));
  if(money>=c && workerLv<MAX){
   money-=c;workerLv++;
-  spawnBuff("生産効率UP");
   upSound.cloneNode().play();
   pressEffect(el);
  }
@@ -268,7 +288,6 @@ function build(el){
  let c=ceil10(5000*Math.pow(2,factory));
  if(money>=c && factory<MAX){
   money-=c;factory++;
-  spawnBuff("+1個/秒");
   upSound.cloneNode().play();
   pressEffect(el);
  }
@@ -362,17 +381,7 @@ function update(){
  trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
  factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
 }
-function spawnBuff(text){
- const p=document.createElement("div");
- p.className="pop";
- p.innerText=text;
 
- p.style.left="600px";
- p.style.top="500px";
-
- document.body.appendChild(p);
- setTimeout(()=>p.remove(),1500);
-}
 update();
 </script>
 
