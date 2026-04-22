@@ -66,19 +66,25 @@ body{margin:0;background:#000;display:flex;justify-content:center;align-items:ce
 .pop{
  position:absolute;
  color:#fff;
- font-size:28px;
- animation:pop 0.8s forwards;
- z-index:9999;   /* ←これ追加 */
- pointer-events:none;
-}
-.pop{
- position:absolute;
- color:#fff;
- font-size:24px;
+ font-size:26px;
  z-index:9999;
  pointer-events:none;
- opacity:0;
- animation:popFade 1s ease-out forwards;
+ animation:popFast 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes popFast{
+ 0%{
+  opacity:0;
+  transform:translate(-50%,-20%) scale(0.8);
+ }
+ 30%{
+  opacity:1;
+  transform:translate(-50%,-80%) scale(1.2);
+ }
+ 100%{
+  opacity:0;
+  transform:translate(-50%,-120%) scale(1);
+ }
 }
 
 @keyframes popFade{
@@ -228,6 +234,24 @@ loadGame();
 window.addEventListener("beforeunload",saveGame);
 
 /* ===== 表示 ===== */
+ function spawnPop(val){
+ const r = hatBtn.getBoundingClientRect();
+
+ // ランダムズレ（小さめ）
+ const randX = (Math.random() - 0.5) * 30; // 横±15px
+ const randY = (Math.random() - 0.5) * 20; // 縦±10px
+
+ const p = document.createElement("div");
+ p.className = "pop";
+ p.innerText = "+" + val;
+
+ p.style.left = (r.left + r.width*0.7 + randX) + "px";
+ p.style.top  = (r.top + r.height*0.1 + randY) + "px";
+
+ document.body.appendChild(p);
+
+ setTimeout(()=>p.remove(),600);
+}
 function formatMoney(n){
  n=Math.floor(n);
  if(n>=1e16)return(Math.floor(n/1e14)/100)+"京円";
