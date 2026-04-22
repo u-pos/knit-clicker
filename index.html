@@ -9,7 +9,17 @@
 body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:'DotGothic16';}
 #game{width:1280px;height:720px;position:relative;}
 .bg{position:absolute;width:100%;height:100%;}
+#volumeBox{
+ position:absolute;
+ top:120px;  /* 納品ボタンの下あたりに微調整可 */
+ right:40px;
+ color:#fff;
+ font-size:18px;
+}
 
+#volumeSlider{
+ width:150px;
+}
 .panel{position:absolute;top:20px;left:20px;width:340px;padding:18px;background:rgba(0,0,0,0.85);border-radius:12px;}
 .panel-text{color:#ffd700;font-size:26px;line-height:2.0;}
 
@@ -71,7 +81,9 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
 <div class="deliver" onclick="sellAll(this)">
   <img src="btn_deliver2.png">
 </div>
-
+<div id="volumeBox">
+  🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
+</div>
 <div class="bottom">
   <div class="btn" onclick="hire(this)"><img src="btn_worker2.png"><div class="price" id="workerCost"></div></div>
   <div class="btn" onclick="upgrade(this)"><img src="btn_upgrade2.png"><div class="price" id="priceCost"></div></div>
@@ -314,7 +326,24 @@ function resetGame(){
  // 念のためリロード
  location.reload();
 }
+const volumeSlider = document.getElementById("volumeSlider");
 
+function applyVolume(v){
+ const vol = v/100;
+
+ bgm.volume = vol;
+
+ clickSound.volume = vol;
+ upSound.volume = vol;
+ moneySound.volume = vol;
+}
+
+volumeSlider.addEventListener("input",()=>{
+ applyVolume(volumeSlider.value);
+});
+
+/* 初期適用 */
+applyVolume(volumeSlider.value);
 /* 更新 */
 function update(){
  moneyEl.innerText="所持金："+formatMoney(money);
