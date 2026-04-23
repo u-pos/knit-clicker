@@ -281,10 +281,19 @@ let clickLevel = 0;
  
 /* ===== 保存 ===== */
 function saveGame(){
-  localStorage.setItem(SAVE_KEY,JSON.stringify({
-   money,hats,price,worker,factory,workerLv,soul,upgradeCount,clickPower,clickLevel,
-   luxList   // ←追加
-  }));
+ localStorage.setItem(SAVE_KEY, JSON.stringify({
+  money,
+  hats,
+  price,
+  worker,
+  factory,
+  workerLv,
+  soul,
+  upgradeCount,
+  clickPower,
+  clickLevel,
+  luxList: JSON.parse(JSON.stringify(luxList)) // ←安全コピー
+ }));
 }
 function loadGame(){
  const d = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -349,9 +358,13 @@ const luxList={
 function buyLux(type){
  const item=luxList[type];
  if(item.bought) return;
+
  if(money>=item.price){
   money-=item.price;
   item.bought=true;
+
+  saveGame(); // ←これ追加（超重要）
+
   updateLux();
   update();
  }
