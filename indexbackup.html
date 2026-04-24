@@ -295,11 +295,18 @@ function saveGame(){
   luxList: JSON.parse(JSON.stringify(luxList)) // ←安全コピー
  }));
 }
+const luxList={
+ car:{price:50000000,bought:false},
+ house:{price:300000000,bought:false},
+ island:{price:1000000000,bought:false},
+ space:{price:2000000000,bought:false}
+};
+
 function loadGame(){
  const d = JSON.parse(localStorage.getItem(SAVE_KEY));
  if(!d) return;
 
- // ▼ 先に基本データ
+ // 基本データ
  money=d.money||0;
  hats=d.hats||0;
  price=d.price||100;
@@ -311,7 +318,7 @@ function loadGame(){
  clickPower = d.clickPower || 1;
  clickLevel = d.clickLevel || 0;
 
- // ▼ luxは最後に読む
+ // 贅沢品
  if(d.luxList){
   Object.keys(luxList).forEach(k=>{
    if(d.luxList[k]){
@@ -323,7 +330,7 @@ function loadGame(){
  autoBuffer=0;
  paused=false;
 }
- 
+
 loadGame();
 
 /* ページ閉じる時だけ保存（進行なし） */
@@ -348,12 +355,6 @@ window.addEventListener("beforeunload",saveGame);
 
  setTimeout(()=>p.remove(),600);
 }
-const luxList={
- car:{price:50000000,bought:false},
- house:{price:300000000,bought:false},
- island:{price:1000000000,bought:false},
- space:{price:2000000000,bought:false}
-};
 
 function buyLux(type){
  const item=luxList[type];
@@ -646,8 +647,8 @@ function update(){
  document.getElementById("clickCost").innerText = formatCost(getClickCost());
  priceCost.innerText=formatCost(ceil10(500*Math.pow(1.25,upgradeCount)));
  workerCost.innerText=formatCost(ceil10(100*Math.pow(1.5,worker)));
- trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
- factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
+ trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.0,workerLv-1)));
+ factoryCost.innerText=formatCost(ceil10(7000*Math.pow(1.7,factory)));
 
 const btns = document.querySelectorAll(".btn");
 
