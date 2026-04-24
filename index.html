@@ -133,6 +133,43 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
 .modal.active{display:block;}
 #modalText{color:#fff;font-size:24px;}
 .modal button{margin:10px;padding:10px;}
+#luxBox{
+ position:absolute;
+ top:180px;
+ right:40px;              /* ←右に寄せる（今より小さくする） */
+ width:210px;
+
+ background:rgba(0,0,0,0.7); /* ←黒70%背景 */
+ padding:10px;
+ border-radius:10px;
+}
+.luxTitle{
+ color:#7CFC00;   /* 黄緑 */
+ font-size:18px;
+ margin-bottom:10px;
+}
+.luxItem{
+ font-size:20px;
+ margin-bottom:8px;
+ color:#777;
+ cursor:pointer;
+ display:flex;
+ align-items:center;
+}
+
+.luxItem.active{
+ color:#fff;
+}
+
+.luxItem.done{
+ color:#ffd700;
+ cursor:default;
+}
+
+.luxItem img{
+ width:20px;
+ margin-right:6px;
+}
 </style>
 </head>
 
@@ -166,6 +203,13 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
 </div>
 <div id="volumeBox">
   🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
+</div>
+ <div id="luxBox">
+ <div class="luxTitle">▼贅沢品（コレクション）</div>
+ <div class="luxItem" id="lux_car" onclick="buyLux('car')">高級車（5000万円）</div>
+ <div class="luxItem" id="lux_house" onclick="buyLux('house')">豪邸（3億円）</div>
+ <div class="luxItem" id="lux_island" onclick="buyLux('island')">無人島（10億円）</div>
+ <div class="luxItem" id="lux_space" onclick="buyLux('space')">宇宙旅行（20億円）</div>
 </div>
 <div class="bottom">
 
@@ -237,14 +281,32 @@ let clickLevel = 0;
  
 /* ===== 保存 ===== */
 function saveGame(){
- localStorage.setItem(SAVE_KEY,JSON.stringify({
-  money,hats,price,worker,factory,workerLv,soul,upgradeCount,clickPower,clickLevel   // ←追加
+ localStorage.setItem(SAVE_KEY, JSON.stringify({
+  money,
+  hats,
+  price,
+  worker,
+  factory,
+  workerLv,
+  soul,
+  upgradeCount,
+  clickPower,
+  clickLevel,
+  luxList: JSON.parse(JSON.stringify(luxList)) // ←安全コピー
  }));
 }
-function loadGame(){
- const d=JSON.parse(localStorage.getItem(SAVE_KEY));
- if(!d)return;
+const luxList={
+ car:{price:50000000,bought:false},
+ house:{price:300000000,bought:false},
+ island:{price:1000000000,bought:false},
+ space:{price:2000000000,bought:false}
+};
 
+function loadGame(){
+ const d = JSON.parse(localStorage.getItem(SAVE_KEY));
+ if(!d) return;
+
+ // 基本データ
  money=d.money||0;
  hats=d.hats||0;
  price=d.price||100;
@@ -255,9 +317,20 @@ function loadGame(){
  upgradeCount=d.upgradeCount||0;
  clickPower = d.clickPower || 1;
  clickLevel = d.clickLevel || 0;
+
+ // 贅沢品
+ if(d.luxList){
+  Object.keys(luxList).forEach(k=>{
+   if(d.luxList[k]){
+    luxList[k].bought = d.luxList[k].bought;
+   }
+  });
+ }
+
  autoBuffer=0;
  paused=false;
 }
+
 loadGame();
 
 /* ページ閉じる時だけ保存（進行なし） */
@@ -282,6 +355,23 @@ window.addEventListener("beforeunload",saveGame);
 
  setTimeout(()=>p.remove(),600);
 }
+
+function buyLux(type){
+ const item=luxList[type];
+ if(item.bought) return;
+
+ if(money>=item.price){
+  money-=item.price;
+  item.bought=true;
+
+  saveGame(); // ←これ追加（超重要）
+
+  updateLux();
+  update();
+ }
+}
+
+ 
 function formatMoney(n){
  n=Math.floor(n);
  if(n>=1e16)return(Math.floor(n/1e14)/100)+"京円";
@@ -523,6 +613,25 @@ function setBtnState(el, condition){
   el.classList.add("disabled");
  }
 }
+ function updateLux(){
+ Object.keys(luxList).forEach(key=>{
+  const el=document.getElementById("lux_"+key);
+  const data=luxList[key];
+
+  if(data.bought){
+   el.classList.add("done");
+   el.innerHTML='<img src="archieve.png">'+el.innerText;
+  }else{
+   el.classList.remove("done");
+
+   if(money>=data.price){
+    el.classList.add("active");
+   }else{
+    el.classList.remove("active");
+   }
+  }
+ });
+}
 /* 初期適用 */
 applyVolume(volumeSlider.value);
 /* 更新 */
@@ -538,8 +647,8 @@ function update(){
  document.getElementById("clickCost").innerText = formatCost(getClickCost());
  priceCost.innerText=formatCost(ceil10(500*Math.pow(1.25,upgradeCount)));
  workerCost.innerText=formatCost(ceil10(100*Math.pow(1.5,worker)));
- trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.2,workerLv-1)));
- factoryCost.innerText=formatCost(ceil10(5000*Math.pow(2,factory)));
+ trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.0,workerLv-1)));
+ factoryCost.innerText=formatCost(ceil10(7000*Math.pow(1.7,factory)));
 
 const btns = document.querySelectorAll(".btn");
 
@@ -551,7 +660,7 @@ if(typeof setBtnState === "function" && btns.length === 5){
  setBtnState(btns[4], money >= getClickCost());
 }
 }
-
+updateLux();
 update();
 </script>
 
