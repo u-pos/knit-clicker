@@ -278,8 +278,9 @@ let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
 let upgradeCount=0,autoBuffer=0,paused=false;
 let clickPower = 1;   // ←ここに移動
 let clickLevel = 0;
- 
-/* ===== 保存 ===== */
+let clickUpgradeCount = 0; // ←これ追加
+
+ /* ===== 保存 ===== */
 function saveGame(){
  localStorage.setItem(SAVE_KEY, JSON.stringify({
   money,
@@ -291,7 +292,7 @@ function saveGame(){
   soul,
   upgradeCount,
   clickPower,
-  clickLevel,
+  clickLevel,clickUpgradeCount,
   luxList: JSON.parse(JSON.stringify(luxList)) // ←安全コピー
  }));
 }
@@ -317,6 +318,7 @@ function loadGame(){
  upgradeCount=d.upgradeCount||0;
  clickPower = d.clickPower || 1;
  clickLevel = d.clickLevel || 0;
+ clickUpgradeCount = d.clickUpgradeCount || 0;
 
  // 贅沢品
  if(d.luxList){
@@ -509,18 +511,21 @@ function build(el){
  }
 }
 function getClickCost(){
- return Math.floor(80000*Math.pow(2.1,clickLevel));
+ return Math.floor(80000 * Math.pow(2.1, clickUpgradeCount));
 }
 
 function upgradeClick(el){
  let cost = getClickCost();
  if(money >= cost){
   money -= cost;
+
   clickPower++;
-  clickLevel++;
+  clickLevel++;          // 表示用（そのまま）
+  clickUpgradeCount++;   // ←これが本体
+
   playSE(upSound);
   pressEffect(el);
-  spawnPopAt(el,"手動クリック+1UP");  // ←追加
+  spawnPopAt(el,"手動クリック+1UP");
  }
  update();
 }
