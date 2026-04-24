@@ -205,7 +205,7 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
   🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
 </div>
  <div id="luxBox">
- <div class="luxTitle">▼贅沢品（コレクション）</div>
+ <div class="luxTitle">▼実績（コレクション）</div>
  <div class="luxItem" id="lux_car" onclick="buyLux('car')">高級車（5000万円）</div>
  <div class="luxItem" id="lux_house" onclick="buyLux('house')">豪邸（3億円）</div>
  <div class="luxItem" id="lux_island" onclick="buyLux('island')">無人島（10億円）</div>
@@ -320,7 +320,7 @@ function loadGame(){
  clickLevel = d.clickLevel || 0;
  clickUpgradeCount = d.clickUpgradeCount || 0;
 
- // 贅沢品
+ // 実績
  if(d.luxList){
   Object.keys(luxList).forEach(k=>{
    if(d.luxList[k]){
