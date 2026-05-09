@@ -445,7 +445,7 @@ hatBtn.onclick=()=>{
 /* 自動（起動中のみ） */
 setInterval(()=>{
  if(paused)return;
- let g=(worker*0.1*Math.pow(workerLv,1.1))+(factory*1.0);
+ let g=(worker*0.08*Math.pow(workerLv,1.08))+(factory*0.8);
  hats+=g;
  autoBuffer+=g;
 
