@@ -594,13 +594,15 @@ function resetGame(){
  upgradeCount=0;
  autoBuffer=0;
 
- // ▼これを追加（今回のバグ原因）
+ // 手動クリック関連
  clickPower = 1;
  clickLevel = 0;
+ clickUpgradeCount = 0; // ←これ追加（重要）
 
  update();
  location.reload();
 }
+ 
 const volumeSlider = document.getElementById("volumeSlider");
 
 function applyVolume(v){
