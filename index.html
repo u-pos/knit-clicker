@@ -170,6 +170,14 @@ background:#000;padding:20px;border:2px solid #fff;text-align:center;display:non
  width:20px;
  margin-right:6px;
 }
+
+.lazyWorker{
+ position:absolute;
+ width:70px;
+ height:70px;
+ cursor:pointer;
+ z-index:50;
+}
 </style>
 </head>
 
@@ -256,6 +264,7 @@ const MAX=99;
 const clickSound=new Audio("click.mp3");
 const upSound=new Audio("up.mp3");
 const moneySound=new Audio("money.mp3");
+const saboriSound=new Audio("sabori.mp3");
 const bgm=new Audio("bgm.mp3");
 bgm.loop=true;bgm.volume=0.3;
 let masterVolume = 0.3;
@@ -280,6 +289,8 @@ let clickPower = 1;   // ←ここに移動
 let clickLevel = 0;
 let clickUpgradeCount = 0; // ←これ追加
 
+let lazyWorkers = []; // サボり管理
+
  /* ===== 保存 ===== */
 function saveGame(){
  localStorage.setItem(SAVE_KEY, JSON.stringify({
@@ -292,7 +303,9 @@ function saveGame(){
   soul,
   upgradeCount,
   clickPower,
-  clickLevel,clickUpgradeCount,
+  clickLevel,
+  clickUpgradeCount,
+  lazyWorkers,
   luxList: JSON.parse(JSON.stringify(luxList)) // ←安全コピー
  }));
 }
@@ -319,6 +332,8 @@ function loadGame(){
  clickPower = d.clickPower || 1;
  clickLevel = d.clickLevel || 0;
  clickUpgradeCount = d.clickUpgradeCount || 0;
+
+ lazyWorkers = d.lazyWorkers || [];
 
  // 実績
  if(d.luxList){
@@ -371,6 +386,61 @@ function buyLux(type){
   updateLux();
   update();
  }
+}
+
+
+function spawnLazyWorker(){
+
+ if(worker <= lazyWorkers.length) return;
+
+ const id = Date.now() + "_" + Math.random();
+
+ // ▼ 実績の下あたりに限定
+ const x = 980 + Math.random()*180;
+ const y = 420 + Math.random()*120;
+
+ lazyWorkers.push({
+  id:id,
+  x:x,
+  y:y
+ });
+
+ renderLazyWorkers();
+ saveGame();
+ update();
+}
+
+function renderLazyWorkers(){
+
+ document.querySelectorAll(".lazyWorker").forEach(e=>e.remove());
+
+ const game = document.getElementById("game");
+
+ lazyWorkers.forEach(w=>{
+
+  const img=document.createElement("img");
+
+  img.src="sabori.png";
+  img.className="lazyWorker";
+
+  img.style.position="absolute";
+  img.style.left=w.x+"px";
+  img.style.top=w.y+"px";
+
+  img.onclick=()=>recoverWorker(w.id);
+
+  game.appendChild(img);
+ });
+}
+function recoverWorker(id){
+
+ playSE(saboriSound);
+
+ lazyWorkers = lazyWorkers.filter(w=>w.id!==id);
+
+ renderLazyWorkers();
+ saveGame();
+ update();
 }
 
  
@@ -445,7 +515,9 @@ hatBtn.onclick=()=>{
 /* 自動（起動中のみ） */
 setInterval(()=>{
  if(paused)return;
- let g=(worker*0.08*Math.pow(workerLv,1.08))+(factory*0.8);
+ let activeWorker = worker - lazyWorkers.length;
+
+ let g=(activeWorker*0.08*Math.pow(workerLv,1.08))+(factory*0.8);
  hats+=g;
  autoBuffer+=g;
 
@@ -456,6 +528,14 @@ setInterval(()=>{
  }
  update();
 },500);
+
+setInterval(()=>{
+
+ if(paused)return;
+
+ spawnLazyWorker();
+
+},600000);
 
 /* 納品 */
 function sellAll(el){
@@ -552,7 +632,8 @@ function confirmReset(){
 
 /* その他 */
 function prestige(){
- // ▼ 転生回数計算（上限50）
+
+ // ▼ 今回増える転生数
  let g = Math.min(50, Math.floor(money / 1e8));
 
  soul += g;
@@ -560,16 +641,36 @@ function prestige(){
  // ▼ リセット
  money=0;
  hats=0;
- price=100;
+
+ // ▼ 転生ボーナス単価
+ price = 100 + soul * 50;
+
  worker=0;
  factory=0;
  workerLv=1;
  upgradeCount=0;
  autoBuffer=0;
 
- // ▼ 転生ボーナス（1回につき+2）
+ // ▼ 手動クリック系リセット
+ clickUpgradeCount = 0;
+
+ // ▼ 転生ボーナス
  clickPower = 1 + soul * 2;
  clickLevel = soul * 2;
+
+ // ▼ サボり解除
+ lazyWorkers = [];
+
+ saveGame();
+ update();
+
+ // ▼ 転生メッセージ
+ openModal(
+  "転生した！転生ボーナスGET！\\n\\n"
+  +"デフォルト商品単価 +"+(soul*50)+"円\\n"
+  +"自身クリック +"+(clickPower-1),
+  "<button onclick='closeModal()'>OK</button>"
+ );
 }
 function saveAndPause(){
  saveGame();
@@ -598,6 +699,8 @@ function resetGame(){
  clickPower = 1;
  clickLevel = 0;
  clickUpgradeCount = 0; // ←これ追加（重要）
+
+ lazyWorkers = [];
 
  update();
  location.reload();
@@ -646,7 +749,7 @@ function update(){
  moneyEl.innerText="所持金："+formatMoney(money);
  hatEl.innerText=Math.floor(hats);
  priceEl.innerText=price;
- workerEl.innerText=worker;
+ workerEl.innerText=(worker-lazyWorkers.length)+" / "+worker;
  workerLvEl.innerText=workerLv;
  factoryEl.innerText=factory;
  soulEl.innerText=soul;
@@ -687,6 +790,7 @@ if(typeof setBtnState === "function" && btns.length === 5){
  );
 }
 }
+renderLazyWorkers();
 updateLux();
 update();
 </script>
