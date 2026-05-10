@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ニット帽クリッカー</title>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+
+<style>body, #game, .btn, .hat, .deliver {
+ user-select: none;
+ -webkit-user-select: none;
+ -ms-user-select: none;
+}
+body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;height:100vh;font-family:'DotGothic16';}
+#game{width:1280px;height:720px;position:relative;}
+.bg{position:absolute;width:100%;height:100%;}
+#volumeBox{
+ position:absolute;
+ top:130px;  /* 納品ボタンの下あたりに微調整可 */
+ right:50px;
+ color:#fff;
+ font-size:20px;
+}
+
+#volumeSlider{
+ width:150px;
+}
+.panel{position:absolute;top:20px;left:20px;width:340px;padding:18px;background:rgba(0,0,0,0.85);border-radius:12px;}
+.panel-text{color:#ffd700;font-size:26px;line-height:2.0;}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+.ctrl{background:#222;color:#fff;padding:10px;text-align:center;cursor:pointer;transition:0.1s;}
+.ctrl:active{background:#a00000;transform:scale(0.95);}
+
+.hat{position:absolute;top:150px;left:540px;width:360px;cursor:pointer;transition:0.1s;}
+
+.deliver{position:absolute;top:20px;right:40px;width:260px;cursor:pointer;}
+.deliver img{width:100%;}
+
+.bottom{position:absolute;bottom:0;width:100%;height:200px;}
+.btn{position:absolute;width:240px;height:180px;cursor:pointer;}
+.btn:nth-child(1){left:10px;}
+.btn:nth-child(2){left:250px;}
+.btn:nth-child(3){left:490px;}
+.btn:nth-child(4){left:730px;}
+.btn:nth-child(5){left:970px;}
+.btn.disabled{
+ filter:brightness(0.5);
+ pointer-events:none;
+}
+.btn img{
+ position:absolute;
+ bottom:0;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+}
+.price{
+ position:absolute;
+ bottom:5px;
+ left:50%;
+ transform:translateX(-50%);
+ color:#fff;
+ font-size:20px;
+
+ background:rgba(0,0,0,0.5); /* ←これが本体 */
+ padding:0px 5px;            /* ←見やすさUP */
+ border-radius:6px;         /* ←ちょい高級感 */
+}
+
+.pop{
+ position:absolute;
+ color:#fff;
+ font-size:26px;
+ z-index:9999;
+ pointer-events:none;
+ animation:popFast 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.popBtn{
+ animation:popFastBtn 1.2s ease-out forwards;
+}
+
+@keyframes popFastBtn{
+ 0%{
+  opacity:0;
+  transform:translate(-50%,-10%) scale(0.9);
+ }
+ 20%{
+  opacity:1;
+  transform:translate(-50%,-60%) scale(1.1);
+ }
+ 80%{
+  opacity:1;
+ }
+ 100%{
+  opacity:0;
+  transform:translate(-50%,-90%);
+ }
+}
+@keyframes popFast{
+ 0%{
+  opacity:0;
+  transform:translate(-50%,-20%) scale(0.8);
+ }
+ 30%{
+  opacity:1;
+  transform:translate(-50%,-80%) scale(1.2);
+ }
+ 100%{
+  opacity:0;
+  transform:translate(-50%,-120%) scale(1);
+ }
+}
+
+@keyframes popFade{
+ 0%{
+  opacity:0;
+  transform:translate(-50%,-20%);
+ }
+ 20%{
+  opacity:1;
+ }
+ 80%{
+  opacity:1;
+ }
+ 100%{
+  opacity:0;
+  transform:translate(-50%,-40%);
+ }
+}
+
+.modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+background:#000;padding:20px;border:2px solid #fff;text-align:center;display:none;z-index:999;}
+.modal.active{display:block;}
+#modalText{color:#fff;font-size:24px;}
+.modal button{margin:10px;padding:10px;}
+#luxBox{
+ position:absolute;
+ top:180px;
+ right:40px;              /* ←右に寄せる（今より小さくする） */
+ width:210px;
+
+ background:rgba(0,0,0,0.7); /* ←黒70%背景 */
+ padding:10px;
+ border-radius:10px;
+}
+.luxTitle{
+ color:#7CFC00;   /* 黄緑 */
+ font-size:18px;
+ margin-bottom:10px;
+}
+.luxItem{
+ font-size:20px;
+ margin-bottom:8px;
+ color:#777;
+ cursor:pointer;
+ display:flex;
+ align-items:center;
+}
+
+.luxItem.active{
+ color:#fff;
+}
+
+.luxItem.done{
+ color:#ffd700;
+ cursor:default;
+}
+
+.luxItem img{
+ width:20px;
+ margin-right:6px;
+}
+
+.lazyWorker{
+ position:absolute;
+ width:10px;
+ height:10px;
+ cursor:pointer;
+ z-index:50;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+<img src="bg.jpg" class="bg">
+
+<div class="panel">
+  <div class="panel-text">
+    <div id="money"></div>
+    <div>ニット帽：<span id="hat"></span>個</div>
+    <div>商品単価：<span id="price"></span>円</div>
+    <div>パート：<span id="worker"></span>人（LV<span id="workerLv"></span>）</div>
+    <div>工場数：<span id="factory"></span>棟</div>
+    <div>転生：<span id="soul"></span>回</div>
+  </div>
+
+  <div class="grid">
+    <div class="ctrl" onclick="confirmPrestige()">転生する</div>
+    <div class="ctrl" onclick="saveAndPause()">保存して終了</div>
+    <div class="ctrl" onclick="resumeGame()">再開する</div>
+    <div class="ctrl" onclick="confirmReset()">廃業する</div>
+  </div>
+</div>
+
+<img src="knit-hat-v2.png" class="hat" id="hatBtn">
+
+<div class="deliver" onclick="sellAll(this)">
+  <img src="btn_deliver2.png">
+</div>
+<div id="volumeBox">
+  🔊 <input type="range" id="volumeSlider" min="0" max="100" value="30">
+</div>
+ <div id="luxBox">
+ <div class="luxTitle">▼実績（コレクション）</div>
+ <div class="luxItem" id="lux_car" onclick="buyLux('car')">高級車（5000万円）</div>
+ <div class="luxItem" id="lux_house" onclick="buyLux('house')">豪邸（3億円）</div>
+ <div class="luxItem" id="lux_island" onclick="buyLux('island')">無人島（10億円）</div>
+ <div class="luxItem" id="lux_space" onclick="buyLux('space')">宇宙旅行（20億円）</div>
+</div>
+<div class="bottom">
+
+  <div class="btn" onclick="hire(this)">
+    <img src="btn_worker3.png">
+    <div class="price" id="workerCost"></div>
+  </div>
+
+  <div class="btn" onclick="upgrade(this)">
+    <img src="btn_upgrade3.png">
+    <div class="price" id="priceCost"></div>
+  </div>
+
+  <div class="btn" onclick="train(this)">
+    <img src="btn_training3.png">
+    <div class="price" id="trainCost"></div>
+  </div>
+
+  <div class="btn" onclick="build(this)">
+    <img src="btn_factory3.png">
+    <div class="price" id="factoryCost"></div>
+  </div>
+
+  <div class="btn" onclick="upgradeClick(this)">
+    <img src="btn_click3.png">
+    <div class="price" id="clickCost"></div>
+  </div>
+
+</div>
+</div>
+
+<div class="modal" id="modal">
+  <div id="modalText"></div>
+  <div id="modalButtons"></div>
+</div>
+
+</div>
+
+<script>
+const SAVE_KEY="knitSave";
+const MAX=99;
+
+/* ===== 音 ===== */
+const clickSound=new Audio("click.mp3");
+const upSound=new Audio("up.mp3");
+const moneySound=new Audio("money.mp3");
+const bgm=new Audio("bgm.mp3");
+bgm.loop=true;bgm.volume=0.3;
+let masterVolume = 0.3;
+
+function playSE(base){
+ const s = base.cloneNode();
+ s.volume = masterVolume;
+ s.play();
+}
+let bgmStarted=false;
+document.addEventListener("click",()=>{
+ if(!bgmStarted){
+  bgm.play().catch(()=>{});
+  bgmStarted=true;
+ }
+},{once:true});
+
+/* ===== 状態 ===== */
+let money=0,hats=0,price=100,worker=0,factory=0,workerLv=1,soul=0;
+let upgradeCount=0,autoBuffer=0,paused=false;
+let clickPower = 1;   // ←ここに移動
+let clickLevel = 0;
+let clickUpgradeCount = 0; // ←これ追加
+
+let lazyWorkers = []; // サボり管理
+
+ /* ===== 保存 ===== */
+function saveGame(){
+ localStorage.setItem(SAVE_KEY, JSON.stringify({
+  money,
+  hats,
+  price,
+  worker,
+  factory,
+  workerLv,
+  soul,
+  upgradeCount,
+  clickPower,
+  clickLevel,
+  clickUpgradeCount,
+  lazyWorkers,
+  luxList: JSON.parse(JSON.stringify(luxList)) // ←安全コピー
+ }));
+}
+const luxList={
+ car:{price:50000000,bought:false},
+ house:{price:300000000,bought:false},
+ island:{price:1000000000,bought:false},
+ space:{price:2000000000,bought:false}
+};
+
+function loadGame(){
+ const d = JSON.parse(localStorage.getItem(SAVE_KEY));
+ if(!d) return;
+
+ // 基本データ
+ money=d.money||0;
+ hats=d.hats||0;
+ price=d.price||100;
+ worker=d.worker||0;
+ factory=d.factory||0;
+ workerLv=d.workerLv||1;
+ soul=d.soul||0;
+ upgradeCount=d.upgradeCount||0;
+ clickPower = d.clickPower || 1;
+ clickLevel = d.clickLevel || 0;
+ clickUpgradeCount = d.clickUpgradeCount || 0;
+
+ lazyWorkers = d.lazyWorkers || [];
+
+ // 実績
+ if(d.luxList){
+  Object.keys(luxList).forEach(k=>{
+   if(d.luxList[k]){
+    luxList[k].bought = d.luxList[k].bought;
+   }
+  });
+ }
+
+ autoBuffer=0;
+ paused=false;
+}
+
+loadGame();
+
+/* ページ閉じる時だけ保存（進行なし） */
+window.addEventListener("beforeunload",saveGame);
+
+/* ===== 表示 ===== */
+ function spawnPop(val){
+ const r = hatBtn.getBoundingClientRect();
+
+ // ランダムズレ（小さめ）
+ const randX = (Math.random() - 0.5) * 30; // 横±15px
+ const randY = (Math.random() - 0.5) * 20; // 縦±10px
+
+ const p = document.createElement("div");
+ p.className = "pop";
+ p.innerText = "+" + val;
+
+ p.style.left = (r.left + r.width*0.7 + randX) + "px";
+ p.style.top  = (r.top + r.height*0.1 + randY) + "px";
+
+ document.body.appendChild(p);
+
+ setTimeout(()=>p.remove(),600);
+}
+
+function buyLux(type){
+ const item=luxList[type];
+ if(item.bought) return;
+
+ if(money>=item.price){
+  money-=item.price;
+  item.bought=true;
+
+  saveGame(); // ←これ追加（超重要）
+
+  updateLux();
+  update();
+ }
+}
+
+
+function spawnLazyWorker(){
+
+ if(worker <= lazyWorkers.length) return;
+
+ const id = Date.now() + "_" + Math.random();
+
+ const x = 930 + Math.random()*260;
+ const y = 330 + Math.random()*220;
+
+ lazyWorkers.push({
+  id:id,
+  x:x,
+  y:y
+ });
+
+ renderLazyWorkers();
+ saveGame();
+ update();
+}
+
+function renderLazyWorkers(){
+
+ document.querySelectorAll(".lazyWorker").forEach(e=>e.remove());
+
+ lazyWorkers.forEach(w=>{
+
+  const img=document.createElement("img");
+
+  img.src="sabori.png";
+  img.className="lazyWorker";
+
+  img.style.left=w.x+"px";
+  img.style.top=w.y+"px";
+
+  img.onclick=()=>recoverWorker(w.id);
+
+  game.appendChild(img);
+ });
+}
+
+function recoverWorker(id){
+
+ lazyWorkers = lazyWorkers.filter(w=>w.id!==id);
+
+ renderLazyWorkers();
+ saveGame();
+ update();
+}
+
+ 
+function formatMoney(n){
+ n=Math.floor(n);
+ if(n>=1e16)return(Math.floor(n/1e14)/100)+"京円";
+ if(n>=1e12)return(Math.floor(n/1e10)/100)+"兆円";
+ if(n>=1e8)return(Math.floor(n/1e6)/100)+"億円";
+ if(n>=1e4)return(Math.floor(n/100)/100)+"万円";
+ return n+"円";
+}
+function formatCost(n){
+ n=Math.floor(n);
+ if(n>=1e8)return(Math.floor(n/1e6)/100)+"億円";
+ if(n>=1e4)return(Math.floor(n/100)/100)+"万円";
+ return n+"円";
+}
+function ceil10(n){return Math.ceil(n/10)*10;}
+
+/* DOM */
+const hatBtn=document.getElementById("hatBtn");
+const moneyEl=document.getElementById("money");
+const hatEl=document.getElementById("hat");
+const priceEl=document.getElementById("price");
+const workerEl=document.getElementById("worker");
+const workerLvEl=document.getElementById("workerLv");
+const factoryEl=document.getElementById("factory");
+const soulEl=document.getElementById("soul");
+const priceCost=document.getElementById("priceCost");
+const workerCost=document.getElementById("workerCost");
+const trainCost=document.getElementById("trainCost");
+const factoryCost=document.getElementById("factoryCost");
+
+/* ===== エフェクト ===== */
+
+function spawnPopAt(el,text){
+ const r = el.getBoundingClientRect();
+ const game = document.getElementById("game");
+ const gr = game.getBoundingClientRect();
+
+ const p = document.createElement("div");
+ p.className = "pop popBtn";  // ←ここ追加
+ p.innerText = text;
+
+ p.style.left = (r.left - gr.left + r.width/2) + "px";
+ p.style.top  = (r.top - gr.top) + "px";
+ p.style.transform = "translate(-50%,-100%)";
+
+ game.appendChild(p);
+
+ setTimeout(()=>p.remove(),1000); // ←ここも調整OK
+}
+function hatEffect(val){
+ spawnPop(val);
+ hatBtn.style.transform="scale(0.9)";
+ setTimeout(()=>hatBtn.style.transform="scale(1)",80);
+}
+function pressEffect(el){
+ el.style.transform="scale(0.9)";
+ setTimeout(()=>el.style.transform="scale(1)",80);
+}
+
+/* ===== クリック ===== */
+hatBtn.onclick=()=>{
+ if(paused)return;
+ hats += clickPower;
+ playSE(clickSound);
+ hatEffect(clickPower);
+ update();
+};
+
+/* 自動（起動中のみ） */
+setInterval(()=>{
+ if(paused)return;
+ let activeWorker = worker - lazyWorkers.length;
+
+ let g=(activeWorker*0.08*Math.pow(workerLv,1.08))+(factory*0.8);
+ hats+=g;
+ autoBuffer+=g;
+
+ let t=Math.floor(autoBuffer);
+ if(t>=1){
+  autoBuffer-=t;
+  hatEffect(t);
+ }
+ update();
+},500);
+
+setInterval(()=>{
+
+ if(paused)return;
+
+ spawnLazyWorker();
+
+},1800000);
+
+/* 納品 */
+function sellAll(el){
+ if(paused)return;
+ if(hats>0){
+  money+=Math.floor(hats*price);
+  hats=0;
+  playSE(moneySound);
+  pressEffect(el);
+ }
+ update();
+}
+
+/* 強化 */
+function upgrade(el){
+ let cost=ceil10(500*Math.pow(1.25,upgradeCount));
+ if(money>=cost){
+  money-=cost;
+  price+=10;
+  upgradeCount++;
+
+  playSE(upSound);
+  pressEffect(el);
+
+  spawnPopAt(el,"単価UP");
+ }
+}
+function hire(el){
+ let c=ceil10(100*Math.pow(1.5,worker));
+ if(money>=c && worker<MAX){
+  money-=c;worker++;
+  playSE(upSound);
+  pressEffect(el);
+  spawnPopAt(el,"生産速度UP");
+ }
+}
+function train(el){
+ let c=ceil10(2000*Math.pow(2.0,workerLv-1));
+ if(money>=c && workerLv<MAX){
+  money-=c;workerLv++;
+  playSE(upSound);
+  pressEffect(el);
+  spawnPopAt(el,"生産効率UP");  // ←追加
+ }
+}
+function build(el){
+ let c=ceil10(7000*Math.pow(1.7,factory));
+ if(money>=c && factory<MAX){
+  money-=c;factory++;
+  playSE(upSound);
+  pressEffect(el);
+  spawnPopAt(el,"毎秒+1個UP");  // ←追加
+ }
+}
+function getClickCost(){
+ return Math.floor(80000 * Math.pow(2.1, clickUpgradeCount));
+}
+
+function upgradeClick(el){
+ let cost = getClickCost();
+ if(money >= cost){
+  money -= cost;
+
+  clickPower++;
+  clickLevel++;          // 表示用（そのまま）
+  clickUpgradeCount++;   // ←これが本体
+
+  playSE(upSound);
+  pressEffect(el);
+  spawnPopAt(el,"手動クリック+1UP");
+ }
+ update();
+}
+/* ===== モーダル ===== */
+function openModal(text,buttons){
+ modal.classList.add("active");
+ modalText.innerText=text;
+ modalButtons.innerHTML=buttons;
+}
+function closeModal(){modal.classList.remove("active");}
+
+function confirmPrestige(){
+ if(money<100000000){
+  openModal("1億円以下では転生できません","<button onclick='closeModal()'>OK</button>");
+ }else{
+  openModal("本当に転生しますか？",
+   "<button onclick='prestige();closeModal()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+ }
+}
+function confirmReset(){
+ openModal("本当に廃業しますか？",
+  "<button onclick='resetGame()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+}
+
+/* その他 */
+function prestige(){
+ // ▼ 転生回数計算（上限50）
+ let g = Math.min(50, Math.floor(money / 1e8));
+
+ soul += g;
+
+ // ▼ リセット
+ money=0;
+ hats=0;
+ price=100;
+ worker=0;
+ factory=0;
+ workerLv=1;
+ upgradeCount=0;
+ autoBuffer=0;
+
+ // ▼ 転生ボーナス（1回につき+2）
+ clickPower = 1 + soul * 2;
+ clickLevel = soul * 2;
+}
+function saveAndPause(){
+ saveGame();
+ paused=true;
+ bgm.pause(); // ←追加
+}
+function resumeGame(){
+ paused=false;
+ bgm.play().catch(()=>{}); // ←既存 or なければ追加
+}
+function resetGame(){
+ localStorage.removeItem(SAVE_KEY);
+
+ // 基本ステータス
+ money=0;
+ hats=0;
+ price=100;
+ worker=0;
+ factory=0;
+ workerLv=1;
+ soul=0;
+ upgradeCount=0;
+ autoBuffer=0;
+
+ // 手動クリック関連
+ clickPower = 1;
+ clickLevel = 0;
+ clickUpgradeCount = 0; // ←これ追加（重要）
+
+ lazyWorkers = [];
+
+ update();
+ location.reload();
+}
+ 
+const volumeSlider = document.getElementById("volumeSlider");
+
+function applyVolume(v){
+ masterVolume = v/100;
+ bgm.volume = masterVolume;
+}
+
+volumeSlider.addEventListener("input",()=>{
+ applyVolume(volumeSlider.value);
+});
+function setBtnState(el, condition){
+ if(condition){
+  el.classList.remove("disabled");
+ }else{
+  el.classList.add("disabled");
+ }
+}
+ function updateLux(){
+ Object.keys(luxList).forEach(key=>{
+  const el=document.getElementById("lux_"+key);
+  const data=luxList[key];
+
+  if(data.bought){
+   el.classList.add("done");
+   el.innerHTML='<img src="archieve.png">'+el.innerText;
+  }else{
+   el.classList.remove("done");
+
+   if(money>=data.price){
+    el.classList.add("active");
+   }else{
+    el.classList.remove("active");
+   }
+  }
+ });
+}
+/* 初期適用 */
+applyVolume(volumeSlider.value);
+/* 更新 */
+function update(){
+ moneyEl.innerText="所持金："+formatMoney(money);
+ hatEl.innerText=Math.floor(hats);
+ priceEl.innerText=price;
+ workerEl.innerText=(worker-lazyWorkers.length)+" / "+worker;
+ workerLvEl.innerText=workerLv;
+ factoryEl.innerText=factory;
+ soulEl.innerText=soul;
+
+ document.getElementById("clickCost").innerText = formatCost(getClickCost());
+ priceCost.innerText=formatCost(ceil10(500*Math.pow(1.25,upgradeCount)));
+ workerCost.innerText=formatCost(ceil10(100*Math.pow(1.5,worker)));
+ trainCost.innerText=formatCost(ceil10(2000*Math.pow(2.0,workerLv-1)));
+ factoryCost.innerText=formatCost(ceil10(7000*Math.pow(1.7,factory)));
+
+const btns = document.querySelectorAll(".btn");
+
+if(typeof setBtnState === "function" && btns.length === 5){
+
+ setBtnState(
+  btns[0],
+  money >= ceil10(100*Math.pow(1.5,worker))
+ );
+
+ setBtnState(
+  btns[1],
+  money >= ceil10(500*Math.pow(1.25,upgradeCount))
+ );
+
+ setBtnState(
+  btns[2],
+  money >= ceil10(2000*Math.pow(2.0,workerLv-1))
+ );
+
+ setBtnState(
+  btns[3],
+  money >= ceil10(7000*Math.pow(1.7,factory))
+ );
+
+ setBtnState(
+  btns[4],
+  money >= getClickCost()
+ );
+}
+}
+renderLazyWorkers();
+updateLux();
+update();
+</script>
+
+</body>
+</html>
