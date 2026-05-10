@@ -412,6 +412,8 @@ function renderLazyWorkers(){
 
  document.querySelectorAll(".lazyWorker").forEach(e=>e.remove());
 
+ const game = document.getElementById("game");
+
  lazyWorkers.forEach(w=>{
 
   const img=document.createElement("img");
@@ -427,7 +429,6 @@ function renderLazyWorkers(){
   game.appendChild(img);
  });
 }
-
 function recoverWorker(id){
 
  lazyWorkers = lazyWorkers.filter(w=>w.id!==id);
