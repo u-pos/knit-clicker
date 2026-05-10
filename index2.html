@@ -627,7 +627,8 @@ function confirmReset(){
 
 /* その他 */
 function prestige(){
- // ▼ 転生回数計算（上限50）
+
+ // ▼ 今回増える転生数
  let g = Math.min(50, Math.floor(money / 1e8));
 
  soul += g;
@@ -635,16 +636,36 @@ function prestige(){
  // ▼ リセット
  money=0;
  hats=0;
- price=100;
+
+ // ▼ 転生ボーナス単価
+ price = 100 + soul * 50;
+
  worker=0;
  factory=0;
  workerLv=1;
  upgradeCount=0;
  autoBuffer=0;
 
- // ▼ 転生ボーナス（1回につき+2）
+ // ▼ 手動クリック系リセット
+ clickUpgradeCount = 0;
+
+ // ▼ 転生ボーナス
  clickPower = 1 + soul * 2;
  clickLevel = soul * 2;
+
+ // ▼ サボり解除
+ lazyWorkers = [];
+
+ saveGame();
+ update();
+
+ // ▼ 転生メッセージ
+ openModal(
+  "転生した！転生ボーナスGET！\\n\\n"
+  +"デフォルト商品単価 +"+(soul*50)+"円\\n"
+  +"自身クリック +"+(clickPower-1),
+  "<button onclick='closeModal()'>OK</button>"
+ );
 }
 function saveAndPause(){
  saveGame();
