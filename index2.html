@@ -264,6 +264,7 @@ const MAX=99;
 const clickSound=new Audio("click.mp3");
 const upSound=new Audio("up.mp3");
 const moneySound=new Audio("money.mp3");
+const saboriSound=new Audio("sabori.mp3");
 const bgm=new Audio("bgm.mp3");
 bgm.loop=true;bgm.volume=0.3;
 let masterVolume = 0.3;
@@ -432,6 +433,8 @@ function renderLazyWorkers(){
  });
 }
 function recoverWorker(id){
+
+ playSE(saboriSound);
 
  lazyWorkers = lazyWorkers.filter(w=>w.id!==id);
 
