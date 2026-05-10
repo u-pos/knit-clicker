@@ -394,8 +394,9 @@ function spawnLazyWorker(){
 
  const id = Date.now() + "_" + Math.random();
 
- const x = 930 + Math.random()*260;
- const y = 330 + Math.random()*220;
+ // ▼ 実績の下あたりに限定
+ const x = 980 + Math.random()*180;
+ const y = 420 + Math.random()*120;
 
  lazyWorkers.push({
   id:id,
@@ -421,6 +422,7 @@ function renderLazyWorkers(){
   img.src="sabori.png";
   img.className="lazyWorker";
 
+  img.style.position="absolute";
   img.style.left=w.x+"px";
   img.style.top=w.y+"px";
 
