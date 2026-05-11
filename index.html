@@ -664,11 +664,11 @@ function prestige(){
  saveGame();
  update();
 
- // ▼ 転生メッセージ
+ // ▼ 転生結果表示
  openModal(
-  "転生した！転生ボーナスGET！\\n\\n"
-  +"デフォルト商品単価 +"+(soul*50)+"円\\n"
-  +"自身クリック +"+(clickPower-1),
+  "転生ボーナスGET！\\n\\n"
+  +"デフォルト商品単価：+"+(soul*50)+"円\\n"
+  +"自身クリック強化：+"+(clickPower-1),
   "<button onclick='closeModal()'>OK</button>"
  );
 }
