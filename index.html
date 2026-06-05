@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ニット帽クリッカー</title>
+<title>ニットクリッカー</title>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 
 <style>body, #game, .btn, .hat, .deliver {
@@ -619,10 +619,15 @@ function closeModal(){modal.classList.remove("active");}
 
 function confirmPrestige(){
  if(money<100000000){
-  openModal("1億円以下では転生できません","<button onclick='closeModal()'>OK</button>");
+  openModal(
+   "1億円以下では転生できません",
+   "<button onclick='closeModal()'>OK</button>"
+  );
  }else{
-  openModal("本当に転生しますか？",
-   "<button onclick='prestige();closeModal()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+  openModal(
+   "本当に転生しますか？",
+   "<button onclick='prestige()'>OK</button><button onclick='closeModal()'>キャンセル</button>"
+  );
  }
 }
 function confirmReset(){
