@@ -644,24 +644,20 @@ function prestige(){
  soul += g;
 
  // ▼ リセット
- money=0;
- hats=0;
+ money = 0;
+ hats = 0;
 
- // ▼ 転生ボーナス単価
- price = 100 + soul * 50;
+ // ▼ 転生ボーナス付き初期単価
+ price = 100 + soul * 150;
 
- worker=0;
- factory=0;
- workerLv=1;
- upgradeCount=0;
- autoBuffer=0;
+ worker = 0;
+ factory = 0;
+ workerLv = 1;
+ upgradeCount = 0;
+ autoBuffer = 0;
 
- // ▼ 手動クリック系リセット
+ // ▼ 自身強化コストだけリセット
  clickUpgradeCount = 0;
-
- // ▼ 転生ボーナス
- clickPower = 1 + soul * 2;
- clickLevel = soul * 2;
 
  // ▼ サボり解除
  lazyWorkers = [];
@@ -671,9 +667,9 @@ function prestige(){
 
  // ▼ 転生結果表示
  openModal(
-  "転生ボーナスGET！\\n\\n"
-  +"デフォルト商品単価：+"+(soul*50)+"円\\n"
-  +"自身クリック強化：+"+(clickPower-1),
+  "転生成功！\n\n"
+  + "商品単価ボーナス +" + (soul * 150) + "円！\n"
+  + "自身クリックパワー継続！",
   "<button onclick='closeModal()'>OK</button>"
  );
 }
