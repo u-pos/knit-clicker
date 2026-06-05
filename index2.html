@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ニット帽クリッカー</title>
+<title>ニットクリッカー</title>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 
 <style>body, #game, .btn, .hat, .deliver {
@@ -396,8 +396,8 @@ function spawnLazyWorker(){
  const id = Date.now() + "_" + Math.random();
 
  // ▼ 実績の下あたりに限定
- const x = 980 + Math.random()*180;
- const y = 420 + Math.random()*120;
+ const x = 930 + Math.random()*180;
+ const y = 360 + Math.random()*120;
 
  lazyWorkers.push({
   id:id,
@@ -619,10 +619,15 @@ function closeModal(){modal.classList.remove("active");}
 
 function confirmPrestige(){
  if(money<100000000){
-  openModal("1億円以下では転生できません","<button onclick='closeModal()'>OK</button>");
+  openModal(
+   "1億円以下では転生できません",
+   "<button onclick='closeModal()'>OK</button>"
+  );
  }else{
-  openModal("本当に転生しますか？",
-   "<button onclick='prestige();closeModal()'>OK</button><button onclick='closeModal()'>キャンセル</button>");
+  openModal(
+   "本当に転生しますか？",
+   "<button onclick='prestige()'>OK</button><button onclick='closeModal()'>キャンセル</button>"
+  );
  }
 }
 function confirmReset(){
@@ -664,11 +669,11 @@ function prestige(){
  saveGame();
  update();
 
- // ▼ 転生メッセージ
+ // ▼ 転生結果表示
  openModal(
-  "転生した！転生ボーナスGET！\\n\\n"
-  +"デフォルト商品単価 +"+(soul*50)+"円\\n"
-  +"自身クリック +"+(clickPower-1),
+  "転生ボーナスGET！\\n\\n"
+  +"デフォルト商品単価：+"+(soul*50)+"円\\n"
+  +"自身クリック強化：+"+(clickPower-1),
   "<button onclick='closeModal()'>OK</button>"
  );
 }
